@@ -1,0 +1,4 @@
+#environment variable 
+.env
+#venvs
+venv/
