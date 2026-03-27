@@ -1,6 +1,7 @@
 import os
 from flask import Flask, render_template, request, jsonify
 from google import genai
+from google.genai import types
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -41,6 +42,7 @@ def get_hint():
         data = request.json
         user_input = data.get('prompt', '')
         selected_model = data.get('model', 'gemini-2.5-flash')
+        history = data.get('history', [])
 
         # Formulate the strict hint-only prompt with LaTeX preference
         system_prompt = (
@@ -51,11 +53,22 @@ def get_hint():
             "Use $...$ for inline math and $$...$$ for display math. For example, "
             "write $x^2 - 4 = 0$ instead of x^2 - 4 = 0."
         )
-        full_prompt = f"{system_prompt}\n\nProblem: {user_input}\n\nHint:"
+
+        contents = []
+        for msg in history:
+            role = msg.get('role')
+            text = msg.get('text')
+            contents.append({'role': role, 'parts': [{'text': text}]})
+
+        # Append current input
+        contents.append({'role': 'user', 'parts': [{'text': f"Problem: {user_input}\n\nHint:"}]})
 
         response = client.models.generate_content(
             model=selected_model,
-            contents=full_prompt
+            contents=contents,
+            config=types.GenerateContentConfig(
+                system_instruction=system_prompt,
+            )
         )
 
         return jsonify({
