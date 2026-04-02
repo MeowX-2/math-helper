@@ -1,304 +1,419 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HintSpark ✨ — Math Hint Tutor</title>
+    <title>Math Helper </title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <!-- KaTeX CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
     <style>
-        /* Basic styling for the chat app */
+        :root {
+            --bg-grad-1: #0f172a;
+            --bg-grad-2: #1e293b;
+            --container-bg: rgba(30, 41, 59, 0.7);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --user-msg: linear-gradient(135deg, #3b82f6, #2563eb);
+            --bot-msg: rgba(255, 255, 255, 0.05);
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f4f4f9;
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, var(--bg-grad-1), var(--bg-grad-2));
+            color: var(--text-main);
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
-        }
-        #chat-container {
-            width: 480px;
-            height: 720px;
-            border: 1px solid #ccc;
-            border-radius: 12px;
-            display: flex;
-            flex-direction: column;
-            background-color: #fff;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+            overflow: hidden;
         }
 
-        /* Header area with title and model selector */
-        #header {
-            padding: 12px 16px;
-            border-bottom: 1px solid #eee;
+        #chat-container {
+            width: 500px;
+            height: 750px;
+            max-width: 95vw;
+            max-height: 90vh;
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            background: var(--container-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
         }
+
+        #header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
         h1 {
             text-align: center;
-            color: #333;
-            font-size: 1.4em;
+            color: var(--text-main);
+            font-size: 1.6em;
+            font-weight: 600;
             margin: 0;
+            letter-spacing: -0.02em;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
+
         #model-selector-row {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 12px;
+            justify-content: center;
         }
+
         #model-selector-row label {
-            font-size: 0.8em;
-            color: #666;
+            font-size: 0.85em;
+            color: var(--text-muted);
             white-space: nowrap;
             font-weight: 500;
         }
+
         #model-select {
-            flex-grow: 1;
-            padding: 6px 10px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 0.82em;
-            background-color: #f9f9fb;
-            color: #333;
+            padding: 8px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 0.85em;
+            background-color: rgba(0,0,0,0.3);
+            color: var(--text-main);
             cursor: pointer;
             outline: none;
             appearance: none;
             -webkit-appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23666' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2394a3b8' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
             background-repeat: no-repeat;
-            background-position: right 10px center;
-            padding-right: 28px;
+            background-position: right 14px center;
+            padding-right: 36px;
+            font-family: inherit;
+            transition: all 0.2s ease;
         }
+
         #model-select:focus {
-            border-color: #007bff;
-            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.15);
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+        }
+        
+        #model-select option {
+            background-color: var(--bg-grad-2);
+            color: var(--text-main);
         }
 
         #chat-box {
             flex-grow: 1;
-            padding: 16px 20px;
+            padding: 24px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 16px;
+            scroll-behavior: smooth;
         }
+        
+        /* Custom scrollbar */
+        #chat-box::-webkit-scrollbar {
+            width: 6px;
+        }
+        #chat-box::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        #chat-box::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+        }
+
         .message {
-            padding: 10px 15px;
-            border-radius: 18px;
+            padding: 14px 18px;
+            border-radius: 20px;
             max-width: 85%;
-            line-height: 1.5;
+            line-height: 1.6;
             word-wrap: break-word;
+            animation: fadeIn 0.3s ease forwards;
+            font-size: 0.95em;
         }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         .user-message {
-            background-color: #007bff;
+            background: var(--user-msg);
             color: white;
             align-self: flex-end;
+            border-bottom-right-radius: 4px;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
         }
+
         .bot-message {
-            background-color: #e9e9eb;
-            color: #333;
+            background-color: var(--bot-msg);
+            color: var(--text-main);
             align-self: flex-start;
+            border-bottom-left-radius: 4px;
+            border: 1px solid var(--border-color);
         }
-        /* LaTeX rendered content inside bot messages */
+
         .bot-message .katex-display {
-            margin: 8px 0;
+            margin: 12px 0;
             overflow-x: auto;
             overflow-y: hidden;
+            padding: 8px 0;
+            color: var(--text-main);
         }
+
         .bot-message .katex {
-            font-size: 1.05em;
+            font-size: 1.1em;
+            text-shadow: none;
+            color: var(--text-main);
         }
+
         .typing-indicator {
             align-self: flex-start;
-            color: #999;
-            font-style: italic;
+            color: var(--text-muted);
             font-size: 0.9em;
-            padding: 8px 15px;
+            padding: 8px 18px;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
         }
 
         #input-area {
             display: flex;
-            padding: 10px;
-            border-top: 1px solid #eee;
-            gap: 10px;
+            padding: 20px 24px;
+            border-top: 1px solid var(--border-color);
+            gap: 12px;
+            background: rgba(0, 0, 0, 0.2);
         }
+
         #problem-input {
             flex-grow: 1;
-            border: 1px solid #ccc;
-            border-radius: 18px;
-            padding: 10px 15px;
-            font-size: 1em;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 14px 20px;
+            font-size: 0.95em;
+            color: var(--text-main);
+            font-family: inherit;
+            transition: all 0.2s ease;
         }
+        
+        #problem-input::placeholder {
+            color: var(--text-muted);
+        }
+
         #problem-input:focus {
             outline: none;
-            border-color: #007bff;
+            border-color: var(--accent);
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
         }
+
         #submit-btn {
             border: none;
-            background-color: #007bff;
+            background: var(--accent);
             color: white;
-            padding: 10px 15px;
+            width: 48px;
+            height: 48px;
             border-radius: 50%;
             cursor: pointer;
-            font-weight: bold;
-            transition: background-color 0.15s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.2em;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            flex-shrink: 0;
         }
+
         #submit-btn:hover {
-            background-color: #0056b3;
+            transform: translateY(-2px);
+            background: var(--accent-hover);
+            box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
         }
+        
+        #submit-btn:active {
+            transform: translateY(0);
+        }
+
         #submit-btn:disabled {
-            background-color: #a0c4ff;
+            background: rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.3);
             cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
         }
     </style>
 </head>
+
 <body>
 
-<div id="chat-container">
-    <div id="header">
-        <h1>HintSpark ✨</h1>
-        <div id="model-selector-row">
-            <label for="model-select">Model:</label>
-            <select id="model-select">
-                <option value="gemini-2.5-flash">Loading models...</option>
-            </select>
+    <div id="chat-container">
+        <div id="header">
+            <h1>Math Helper</h1>
+            <div id="model-selector-row">
+                <label for="model-select">Model:</label>
+                <select id="model-select">
+                    <option value="gemini-2.5-flash">Loading models...</option>
+                </select>
+            </div>
         </div>
+        <div id="chat-box">
+            <div class="message bot-message">Hello! Give me a math problem and I'll give you a hint.</div>
+        </div>
+        <form id="input-area" onsubmit="return false;">
+            <input type="text" id="problem-input" placeholder="e.g., How to solve x^2 - 4 = 0?">
+            <button id="submit-btn" type="submit">➤</button>
+        </form>
     </div>
-    <div id="chat-box">
-        <div class="message bot-message">Hello! Give me a math problem and I'll give you a hint.</div>
-    </div>
-    <form id="input-area" onsubmit="return false;">
-        <input type="text" id="problem-input" placeholder="e.g., How to solve x^2 - 4 = 0?">
-        <button id="submit-btn" type="submit">➤</button>
-    </form>
-</div>
 
-<!-- KaTeX JS -->
-<script src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"></script>
+    <!-- KaTeX JS -->
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"></script>
 
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const chatBox = document.getElementById('chat-box');
-        const problemInput = document.getElementById('problem-input');
-        const inputForm = document.getElementById('input-area');
-        const submitBtn = document.getElementById('submit-btn');
-        const modelSelect = document.getElementById('model-select');
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const chatBox = document.getElementById('chat-box');
+            const problemInput = document.getElementById('problem-input');
+            const inputForm = document.getElementById('input-area');
+            const submitBtn = document.getElementById('submit-btn');
+            const modelSelect = document.getElementById('model-select');
+            let chatHistory = [];
 
-        // Fetch available models on page load
-        const loadModels = async () => {
-            try {
-                const res = await fetch('/models');
-                const data = await res.json();
-                if (data.status === 'success' && data.models.length > 0) {
-                    modelSelect.innerHTML = '';
-                    data.models.forEach(name => {
-                        const opt = document.createElement('option');
-                        opt.value = name;
-                        // Display a cleaner name (strip "models/" prefix if present)
-                        opt.textContent = name.replace(/^models\//, '');
-                        modelSelect.appendChild(opt);
+            // Fetch available models on page load
+            const loadModels = async () => {
+                try {
+                    const res = await fetch('/models');
+                    const data = await res.json();
+                    if (data.status === 'success' && data.models.length > 0) {
+                        modelSelect.innerHTML = '';
+                        data.models.forEach(name => {
+                            const opt = document.createElement('option');
+                            opt.value = name;
+                            // Display a cleaner name (strip "models/" prefix if present)
+                            opt.textContent = name.replace(/^models\//, '');
+                            modelSelect.appendChild(opt);
+                        });
+                        // Default to gemini-2.5-flash if available (exact match first)
+                        const defaultModel = data.models.find(m => m === 'models/gemini-2.5-flash')
+                            || data.models.find(m => m.includes('gemini-2.5-flash'));
+                        if (defaultModel) modelSelect.value = defaultModel;
+                    }
+                } catch (e) {
+                    console.error('Failed to load models:', e);
+                }
+            };
+            loadModels();
+
+            const addMessage = (text, sender) => {
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('message', `${sender}-message`);
+
+                if (sender === 'bot') {
+                    // Use innerHTML so KaTeX auto-render can find delimiters
+                    messageElement.innerHTML = text
+                        .replace(/&/g, '&amp;')
+                        .replace(/</g, '&lt;')
+                        .replace(/>/g, '&gt;')
+                        .replace(/\n/g, '<br>');
+
+                    chatBox.appendChild(messageElement);
+
+                    // Render LaTeX in the new message
+                    renderMathInElement(messageElement, {
+                        delimiters: [
+                            { left: '$$', right: '$$', display: true },
+                            { left: '$', right: '$', display: false },
+                            { left: '\\(', right: '\\)', display: false },
+                            { left: '\\[', right: '\\]', display: true },
+                        ],
+                        throwOnError: false,
                     });
-                    // Default to gemini-2.5-flash if available (exact match first)
-                    const defaultModel = data.models.find(m => m === 'models/gemini-2.5-flash')
-                        || data.models.find(m => m.includes('gemini-2.5-flash'));
-                    if (defaultModel) modelSelect.value = defaultModel;
-                }
-            } catch (e) {
-                console.error('Failed to load models:', e);
-            }
-        };
-        loadModels();
-
-        const addMessage = (text, sender) => {
-            const messageElement = document.createElement('div');
-            messageElement.classList.add('message', `${sender}-message`);
-
-            if (sender === 'bot') {
-                // Use innerHTML so KaTeX auto-render can find delimiters
-                messageElement.innerHTML = text
-                    .replace(/&/g, '&amp;')
-                    .replace(/</g, '&lt;')
-                    .replace(/>/g, '&gt;')
-                    .replace(/\n/g, '<br>');
-
-                chatBox.appendChild(messageElement);
-
-                // Render LaTeX in the new message
-                renderMathInElement(messageElement, {
-                    delimiters: [
-                        { left: '$$', right: '$$', display: true },
-                        { left: '$', right: '$', display: false },
-                        { left: '\\(', right: '\\)', display: false },
-                        { left: '\\[', right: '\\]', display: true },
-                    ],
-                    throwOnError: false,
-                });
-            } else {
-                messageElement.textContent = text;
-                chatBox.appendChild(messageElement);
-            }
-
-            chatBox.scrollTop = chatBox.scrollHeight;
-        };
-
-        const showTyping = () => {
-            const el = document.createElement('div');
-            el.classList.add('typing-indicator');
-            el.id = 'typing';
-            el.textContent = 'Thinking...';
-            chatBox.appendChild(el);
-            chatBox.scrollTop = chatBox.scrollHeight;
-        };
-        const hideTyping = () => {
-            const el = document.getElementById('typing');
-            if (el) el.remove();
-        };
-
-        const handleUserInput = async () => {
-            const userInput = problemInput.value.trim();
-            if (!userInput) return;
-
-            addMessage(userInput, 'user');
-            problemInput.value = '';
-            submitBtn.disabled = true;
-            showTyping();
-
-            try {
-                const response = await fetch('/get_hint', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        prompt: userInput,
-                        model: modelSelect.value,
-                    }),
-                });
-
-                hideTyping();
-
-                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-
-                const data = await response.json();
-
-                if (data.status === 'success') {
-                    addMessage(data.response, 'bot');
                 } else {
-                    addMessage(`Error: ${data.message}`, 'bot');
+                    messageElement.textContent = text;
+                    chatBox.appendChild(messageElement);
                 }
-            } catch (error) {
-                hideTyping();
-                console.error('Error fetching hint:', error);
-                addMessage('Sorry, something went wrong while getting your hint.', 'bot');
-            } finally {
-                submitBtn.disabled = false;
-                problemInput.focus();
-            }
-        };
 
-        inputForm.addEventListener('submit', handleUserInput);
-    });
-</script>
+                chatBox.scrollTop = chatBox.scrollHeight;
+            };
+
+            const showTyping = () => {
+                const el = document.createElement('div');
+                el.classList.add('typing-indicator');
+                el.id = 'typing';
+                el.textContent = 'Thinking...';
+                chatBox.appendChild(el);
+                chatBox.scrollTop = chatBox.scrollHeight;
+            };
+            const hideTyping = () => {
+                const el = document.getElementById('typing');
+                if (el) el.remove();
+            };
+
+            const handleUserInput = async () => {
+                const userInput = problemInput.value.trim();
+                if (!userInput) return;
+
+                addMessage(userInput, 'user');
+                problemInput.value = '';
+                submitBtn.disabled = true;
+                showTyping();
+
+                try {
+                    const response = await fetch('/get_hint', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            prompt: userInput,
+                            model: modelSelect.value,
+                            history: chatHistory
+                        }),
+                    });
+
+                    hideTyping();
+
+                    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+
+                    const data = await response.json();
+
+                    if (data.status === 'success') {
+                        addMessage(data.response, 'bot');
+                        chatHistory.push({ role: 'user', text: userInput });
+                        chatHistory.push({ role: 'model', text: data.response });
+                    } else {
+                        addMessage(`Error: ${data.message}`, 'bot');
+                    }
+                } catch (error) {
+                    hideTyping();
+                    console.error('Error fetching hint:', error);
+                    addMessage('Sorry, something went wrong while getting your hint.', 'bot');
+                } finally {
+                    submitBtn.disabled = false;
+                    problemInput.focus();
+                }
+            };
+
+            inputForm.addEventListener('submit', handleUserInput);
+        });
+    </script>
 
 </body>
+
 </html>

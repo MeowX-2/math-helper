@@ -1,0 +1,8 @@
+[mfatal: The current branch master has no upstream branch.
+[mTo push the current branch and set the remote as upstream, use
+
+[m    git push --set-upstream origin master
+
+[mTo have this happen automatically for branches without a tracking
+[mupstream, see 'push.autoSetupRemote' in 'git help config'.
+
