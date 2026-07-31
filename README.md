@@ -148,10 +148,6 @@ math-helper/
   ```bash
   python list_models.py
   ```
-- **Test API Connection**:
-  ```bash
-  python test_api.py
-  ```
 
 ---
 
