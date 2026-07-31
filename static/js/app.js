@@ -464,12 +464,27 @@ async function handleSaveApiKey(e) {
     }
 }
 
-/** Clear custom API Key from localStorage. */
-function clearApiKey() {
+/** Clear custom API Key from localStorage and server .env file on disk. */
+async function clearApiKey() {
+    // 1. Clear browser state
     localStorage.removeItem('user_gemini_api_key');
     const customInput = document.getElementById('custom-api-key');
     if (customInput) customInput.value = '';
-    showToast('Custom API Key cleared', 'info');
+
+    // 2. Call backend to wipe .env file on disk and in-memory os.environ
+    try {
+        const res = await fetch('/api/clear_key', { method: 'POST' });
+        const data = await res.json();
+        if (res.ok && data.status === 'success') {
+            showToast('.env file & browser API keys cleared!', 'info');
+        } else {
+            showToast('Browser API key cleared', 'info');
+        }
+    } catch (err) {
+        console.error('Error clearing .env file:', err);
+        showToast('Browser API key cleared', 'info');
+    }
+
     closeSettingsModal();
 }
 

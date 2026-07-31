@@ -91,3 +91,48 @@ def save_env():
             'status': 'error',
             'message': f'Failed to save .env file: {str(e)}'
         }), 500
+
+
+@main_bp.route('/api/clear_key', methods=['POST'])
+def clear_key():
+    """
+    POST /api/clear_key
+    Industry Standard Clear: Removes API keys from local .env file on disk 
+    and unsets them from Python in-memory os.environ.
+    """
+    try:
+        env_path = os.path.normpath(os.path.join(os.path.dirname(__file__), '..', '.env'))
+        
+        # Unset from in-memory environment
+        for key in ["GEMINI_API_KEY", "CLAUDE_API_KEY", "API"]:
+            os.environ.pop(key, None)
+
+        # Clear key values in .env file on disk
+        if os.path.exists(env_path):
+            env_lines = []
+            with open(env_path, 'r', encoding='utf-8') as f:
+                for line in f:
+                    if line.startswith("GEMINI_API_KEY=") or line.startswith("CLAUDE_API_KEY=") or line.startswith("API="):
+                        var_name = line.split('=')[0]
+                        env_lines.append(f'{var_name}=""\n')
+                    else:
+                        env_lines.append(line)
+            with open(env_path, 'w', encoding='utf-8') as f:
+                f.writelines(env_lines)
+
+            # Reload dotenv with override=True
+            try:
+                from dotenv import load_dotenv
+                load_dotenv(dotenv_path=env_path, override=True)
+            except Exception as err:
+                print(f"Dotenv clear reload note: {err}")
+
+        return jsonify({
+            'status': 'success',
+            'message': 'Successfully cleared API keys from browser and server .env file!'
+        })
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': f'Failed to clear .env file: {str(e)}'
+        }), 500
