@@ -269,11 +269,13 @@ async function handlePublishSubmit(e) {
             closePublishModal();
             document.querySelector('#publish-modal form').reset();
             fetchArticles(); // Refresh article grid
+            showToast('Article published successfully!', 'success');
         } else {
-            alert(`Publish failed: ${data.message}`);
+            showToast(`Publish failed: ${data.message}`, 'error');
         }
     } catch (err) {
         console.error('Error publishing:', err);
+        showToast('Network error during publication', 'error');
     }
 }
 
@@ -377,6 +379,7 @@ function toggleTheme() {
     html.setAttribute('data-theme', newTheme);
 
     document.getElementById('theme-text').textContent = newTheme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode';
+    showToast(`Switched to ${newTheme === 'dark' ? 'Dark' : 'Light'} Mode`, 'info');
 }
 
 /**
@@ -399,6 +402,49 @@ function setTutorPrompt(promptText) {
         sendTutorMessage();
     }
 }
+
+/**
+ * Show a sleek floating toast notification.
+ * @param {string} message - Notification text.
+ * @param {string} type - Toast type ('success' or 'info' or 'error').
+ */
+function showToast(message, type = 'info') {
+    let toastContainer = document.getElementById('toast-container');
+    if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.id = 'toast-container';
+        document.body.appendChild(toastContainer);
+    }
+
+    const toast = document.createElement('div');
+    toast.className = `toast-item toast-${type}`;
+    toast.innerHTML = `<span>${escapeHtml(message)}</span>`;
+    toastContainer.appendChild(toast);
+
+    setTimeout(() => {
+        toast.classList.add('toast-fade-out');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
+// Global Keyboard Shortcuts Listener
+document.addEventListener('keydown', (e) => {
+    // Ctrl+K or Cmd+K: Focus Search Bar
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        const searchInput = document.getElementById('search-input');
+        if (searchInput) searchInput.focus();
+    }
+    // Escape: Close active overlays
+    if (e.key === 'Escape') {
+        closeReader();
+        closePublishModal();
+        const tutorDrawer = document.getElementById('tutor-drawer');
+        if (tutorDrawer && tutorDrawer.classList.contains('active')) {
+            toggleTutorDrawer();
+        }
+    }
+});
 
 // Initialize application on DOM ready
 document.addEventListener('DOMContentLoaded', () => {

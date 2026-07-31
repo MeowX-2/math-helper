@@ -1,6 +1,6 @@
 # HintSpark ✨ — Mathematical Insights & AI Math Assistant
 
-HintSpark is a modern, responsive web application and desktop/PWA app for reading and publishing mathematical essays, complete with KaTeX expression rendering and an interactive **AI Math Assistant** powered by the **Google Gemini API**. 
+HintSpark is a modern, responsive web application, desktop app, and Android-installable PWA for reading and publishing mathematical essays, complete with KaTeX expression rendering and an interactive **AI Math Assistant** powered by the **Google Gemini API**. 
 
 Unlike standard AI search tools that immediately output solutions, HintSpark acts as a **guided math tutor**, providing hints and leading prompts to help users build problem-solving skills independently.
 
@@ -13,7 +13,7 @@ Unlike standard AI search tools that immediately output solutions, HintSpark act
 - 📰 **Mathematical Essays & Feed**: Substack-style article grid with dynamic category navigation (*Number Theory*, *Calculus*, *Algebra*, *Geometry*) and live search.
 - ✍️ **Article Publishing**: Publish community mathematical stories with automatic read-time estimation based on content and LaTeX complexity.
 - 🌙 **Dark & Light Mode**: Instant theme switching with tailored contrast palettes.
-- 📱 **Desktop & PWA App Modes**: Run as a native OS desktop application (`desktop_app.py`) or install directly on mobile/desktop via Progressive Web App (PWA).
+- 📱 **Android & Desktop App Modes**: Install directly on Android/iOS via PWA, build an Android `.apk` via Bubblewrap, or run as a native desktop application (`desktop_app.py`).
 
 ---
 
@@ -102,21 +102,59 @@ Launches HintSpark inside a standalone desktop window (Windows, macOS, Linux).
 
 ---
 
-## 📱 App Conversion Guide (Building Desktop Executables & PWA)
+## 📱 Mobile App & Android APK Creation Guide
 
-### 1. Build Standalone Desktop Executable (`.exe` / `.app`)
-To compile HintSpark into a standalone executable installer that runs without opening a web browser:
+### 1. Instant Android Installation (Zero Setup PWA)
+HintSpark comes with pre-configured Progressive Web App (PWA) files (`manifest.json` + `sw.js`).
+
+1. Deploy your app to **Render.com** (or any free hosting provider).
+2. Open your live app URL in **Chrome on Android** (or Safari on iOS).
+3. Tap the Chrome menu **(⋮)** in the top right.
+4. Tap **"Install app"** or **"Add to Home screen"**.
+
+🎉 **Result**: An official **HintSpark app icon** is placed on your Android home screen and app drawer, opening full-screen like a native mobile app!
+
+---
+
+### 2. Build Standalone Android APK (`.apk`)
+To package HintSpark into an actual `.apk` file using Google's official **Bubblewrap CLI**:
+
+1. Install Bubblewrap CLI:
+   ```bash
+   npm install -g @bubblewrap/cli
+   ```
+2. Initialize project from your live app manifest:
+   ```bash
+   bubblewrap init --manifest=https://your-deployed-app.onrender.com/static/manifest.json
+   ```
+3. Build the signed Android `.apk`:
+   ```bash
+   bubblewrap build
+   ```
+This generates `app-release-signed.apk`, which you can copy to any Android device and tap to install!
+
+---
+
+### 3. Build Standalone Desktop Executable (`.exe` / `.app`)
+To compile HintSpark into a standalone desktop executable installer:
 
 ```bash
 pip install pyinstaller pywebview
 pyinstaller --noconfirm --onedir --windowed --name "HintSpark" desktop_app.py
 ```
-The compiled application output will be generated inside the `dist/HintSpark/` directory.
+The output executable will be placed in `dist/HintSpark/`.
 
-### 2. Progressive Web App (PWA) Installation
-When hosted on any web server:
-- **Desktop (Chrome/Edge)**: Click the **"Install App"** icon in the URL address bar.
-- **Mobile (iOS / Android)**: Tap **"Add to Home Screen"** in Safari or Chrome to install HintSpark as a native mobile home screen app.
+---
+
+## 🌐 Free Cloud Deployment Guide (Render.com)
+
+To host your Flask AI backend on the web for 100% free with automatic GitHub deployments:
+
+1. Push code to GitHub (`git push origin main`).
+2. Go to [Render.com](https://render.com) and create a free Web Service connected to your repository.
+3. Set **Build Command**: `pip install -r requirements.txt` and **Start Command**: `python app.py`.
+4. In **Environment Variables**, add `GEMINI_API_KEY` = `your_gemini_api_key`.
+5. Deploy! Your app will be live on `https://your-app.onrender.com`.
 
 ---
 
