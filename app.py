@@ -20,8 +20,7 @@ load_dotenv()
 
 app = Flask(__name__)
 
-# Configure the Google Gemini API key
-# Accepts 'GEMINI_API_KEY' (recommended) or 'API' (legacy fallback)
+# Configure the Google Gemini API key if present
 api_key = os.getenv("GEMINI_API_KEY") or os.getenv("API")
 if api_key:
     genai.configure(api_key=api_key)
@@ -62,11 +61,6 @@ def save_blogs(blogs):
 def calculate_read_time(content):
     """
     Calculate estimated reading time based on word count and inline/display LaTeX math blocks.
-    
-    Formula:
-    - Words: ~150 words per minute
-    - Inline Math ($...$): ~15 seconds per expression
-    - Display Math ($$...$$): ~30 seconds per block
     """
     if not content:
         return "1 min read"
@@ -93,15 +87,66 @@ def index():
     return render_template('index.html')
 
 
+@app.route('/api/check_key', methods=['GET'])
+def check_key():
+    """
+    GET /api/check_key
+    Check if a Gemini API key is currently configured on the server environment.
+    """
+    current_key = os.getenv("GEMINI_API_KEY") or os.getenv("API")
+    return jsonify({
+        'status': 'success',
+        'has_key': bool(current_key and current_key.strip())
+    })
+
+
+@app.route('/api/save_env', methods=['POST'])
+def save_env():
+    """
+    POST /api/save_env
+    Save user-provided Gemini API key to local .env file on disk and initialize Gemini AI.
+    """
+    try:
+        data = request.json or {}
+        key = data.get('api_key', '').strip()
+
+        if not key:
+            return jsonify({
+                'status': 'error',
+                'message': 'API Key cannot be empty.'
+            }), 400
+
+        # Path to .env file in project root
+        env_path = os.path.join(os.path.dirname(__file__), '.env')
+        
+        # Write/Overwrite .env file on disk
+        with open(env_path, 'w', encoding='utf-8') as f:
+            f.write(f'# HintSpark Environment Configuration\nGEMINI_API_KEY="{key}"\n')
+
+        # Reload environment variables
+        load_dotenv(env_path=env_path, override=True)
+        
+        # Reconfigure genai library
+        genai.configure(api_key=key)
+
+        return jsonify({
+            'status': 'success',
+            'message': '.env file created and API key configured successfully!'
+        })
+
+    except Exception as e:
+        print(f"Error writing .env file: {e}")
+        return jsonify({
+            'status': 'error',
+            'message': f'Failed to write .env file: {str(e)}'
+        }), 500
+
+
 @app.route('/api/blogs', methods=['GET'])
 def get_blogs():
     """
     GET /api/blogs
     Fetch articles filtered by category and search keyword, sorted by date descending.
-    
-    Query Params:
-    - category (optional): Category filter (e.g. 'Calculus', 'Algebra', 'All')
-    - search (optional): Keyword search query matching title, subtitle, content, author, or tags
     """
     category = request.args.get('category', 'All').strip()
     search = request.args.get('search', '').strip().lower()
@@ -133,14 +178,6 @@ def create_blog():
     """
     POST /api/blogs
     Publish a new article post.
-    
-    Payload (JSON):
-    - title (required): Article title
-    - subtitle (optional): Short description
-    - author (optional): Author name (defaults to 'Anonymous Math Writer')
-    - category (optional): Article category
-    - tags (optional): List or comma-separated string of tags
-    - content (required): Main article text (supports LaTeX)
     """
     try:
         data = request.json or {}
@@ -186,7 +223,7 @@ def get_hint():
     POST /get_hint
     Generate a guided hint for a math problem using Google Gemini API.
     Does NOT reveal the direct answer immediately; acts as a math tutor.
-    Supports client-provided custom API key ('X-Gemini-API-Key') or fallback to server environment key.
+    Strictly requires a client-provided API key or a configured server environment key.
     """
     try:
         data = request.json or {}
@@ -205,7 +242,7 @@ def get_hint():
         if not effective_api_key:
             return jsonify({
                 'status': 'error',
-                'message': 'No Gemini API key provided. Please configure your API key in Settings (⚙️).'
+                'message': 'API Key Required: Please enter your Google Gemini API key in Settings (⚙️) to activate the AI Tutor.'
             }), 400
 
         # Re-configure genai with effective API key for this request

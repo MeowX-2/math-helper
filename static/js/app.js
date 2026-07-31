@@ -283,9 +283,27 @@ async function handlePublishSubmit(e) {
 // AI Tutor Assistant Logic (Side Drawer Chat)
 // ==============================================================================
 
-/** Toggle AI Math Tutor side drawer visibility. */
-function toggleTutorDrawer() {
-    document.getElementById('tutor-drawer').classList.toggle('active');
+/** Toggle AI Math Tutor side drawer visibility. Prompt for API key if missing. */
+async function toggleTutorDrawer() {
+    const drawer = document.getElementById('tutor-drawer');
+    const isOpening = !drawer.classList.contains('active');
+    drawer.classList.toggle('active');
+
+    if (isOpening) {
+        const userApiKey = localStorage.getItem('user_gemini_api_key');
+        if (!userApiKey) {
+            try {
+                const res = await fetch('/api/check_key');
+                const data = await res.json();
+                if (!data.has_key) {
+                    showToast('Gemini API Key required to activate AI Tutor.', 'info');
+                    openSettingsModal();
+                }
+            } catch (err) {
+                console.warn('API key check fallback:', err);
+            }
+        }
+    }
 }
 
 /**
@@ -354,6 +372,9 @@ async function sendTutorMessage() {
             renderFormattedContent(aiMsg, data.response);
         } else {
             renderFormattedContent(aiMsg, `Error: ${data.message || 'Unable to generate hint.'}`);
+            if (data.message && data.message.includes('API Key Required')) {
+                openSettingsModal();
+            }
         }
         
         container.scrollTop = container.scrollHeight;
@@ -374,7 +395,7 @@ async function sendTutorMessage() {
 }
 
 // ==============================================================================
-// Settings API Key Modal Logic
+// Settings API Key & .env Setup Modal Logic
 // ==============================================================================
 
 /** Open custom API Key settings modal dialog. */
@@ -392,20 +413,38 @@ function closeSettingsModal() {
 }
 
 /**
- * Handle form submission for saving custom client API Key into localStorage.
+ * Handle form submission for saving custom client API Key into localStorage and writing .env on disk.
  * @param {Event} e - Form submit event.
  */
-function handleSaveApiKey(e) {
+async function handleSaveApiKey(e) {
     e.preventDefault();
     const key = document.getElementById('custom-api-key').value.trim();
-    if (key) {
+    if (!key) return;
+
+    try {
+        // Save key in localStorage for browser state
         localStorage.setItem('user_gemini_api_key', key);
-        showToast('Custom Gemini API Key saved locally!', 'success');
-    } else {
-        localStorage.removeItem('user_gemini_api_key');
-        showToast('Using default server API Key', 'info');
+
+        // Call backend API to write .env file to project root on disk
+        const res = await fetch('/api/save_env', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ api_key: key })
+        });
+        const data = await res.json();
+
+        if (res.ok && data.status === 'success') {
+            showToast('.env file created & API key configured!', 'success');
+            closeSettingsModal();
+        } else {
+            showToast(`API Key saved in browser (server note: ${data.message})`, 'info');
+            closeSettingsModal();
+        }
+    } catch (err) {
+        console.error('Error saving .env file:', err);
+        showToast('API Key saved in browser localStorage', 'success');
+        closeSettingsModal();
     }
-    closeSettingsModal();
 }
 
 /** Clear custom API Key from localStorage. */
