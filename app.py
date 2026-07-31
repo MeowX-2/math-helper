@@ -435,10 +435,15 @@ def get_hint():
                 'response': clean_ai_response(response_text)
             })
         else:
-            err_msg = str(last_error) if last_error else 'No available AI model could process the request. Please check your API key.'
+            raw_err = str(last_error) if last_error else 'No available AI model could process the request.'
+            if '429' in raw_err or 'Quota' in raw_err or 'quota' in raw_err:
+                friendly_msg = "Gemini Free-Tier Rate Limit Reached (15 req/min). Please retry in ~25 seconds, or switch to a Claude API Key in Settings (⚙️)."
+            else:
+                friendly_msg = f"AI Service Error: {raw_err}"
+                
             return jsonify({
                 'status': 'error',
-                'message': f'AI Service Error: {err_msg}'
+                'message': friendly_msg
             }), 400
 
     except generation_types.BlockedPromptError as e:
