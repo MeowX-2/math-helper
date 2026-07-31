@@ -166,10 +166,17 @@ This generates `app-release-signed.apk`, which you can copy to any Android devic
 math-helper/
 ├── .env.example              # Sample environment variable template
 ├── .gitignore                # Git ignore configuration (ignores .env, venvs, cache)
-├── app.py                    # Flask entry point, REST routes & Multi-AI engine (Gemini + Claude)
+├── Procfile                  # Production WSGI server command (gunicorn app:app)
+├── app.py                    # Application factory & WSGI server entry point
 ├── desktop_app.py            # Native OS Desktop application launcher (pywebview)
 ├── list_models.py            # Utility script to query available Gemini models
 ├── requirements.txt          # Python package dependencies
+├── services/
+│   ├── ai_service.py         # Multi-AI provider engine (Gemini & Claude + output sanitizer)
+│   └── blog_service.py       # Article dataset storage, filtering & read-time calculations
+├── routes/
+│   ├── main_routes.py        # Web app shell & .env configuration API endpoints
+│   └── api_routes.py         # REST API endpoints (/api/blogs & /get_hint)
 ├── data/
 │   └── blogs.json            # Local JSON storage for articles & stories
 ├── static/

@@ -220,4 +220,6 @@ def get_tutor_hint(user_input, client_key_header=''):
             print(f"API Key attempt ({source}) failed: {e}")
             last_error = e
 
-    raise last_error
+    if last_error is not None:
+        raise last_error
+    raise Exception("API Key Required: Please configure your Google Gemini or Anthropic Claude API key in Settings (⚙️).")
