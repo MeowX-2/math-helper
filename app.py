@@ -186,6 +186,7 @@ def get_hint():
     POST /get_hint
     Generate a guided hint for a math problem using Google Gemini API.
     Does NOT reveal the direct answer immediately; acts as a math tutor.
+    Supports client-provided custom API key ('X-Gemini-API-Key') or fallback to server environment key.
     """
     try:
         data = request.json or {}
@@ -196,6 +197,19 @@ def get_hint():
                 'status': 'error',
                 'message': 'Prompt cannot be empty.'
             }), 400
+
+        # Resolve API Key: Prefer client-provided key from header/payload, fallback to server .env key
+        client_key = (request.headers.get('X-Gemini-API-Key') or data.get('api_key', '')).strip()
+        effective_api_key = client_key or os.getenv("GEMINI_API_KEY") or os.getenv("API")
+
+        if not effective_api_key:
+            return jsonify({
+                'status': 'error',
+                'message': 'No Gemini API key provided. Please configure your API key in Settings (⚙️).'
+            }), 400
+
+        # Re-configure genai with effective API key for this request
+        genai.configure(api_key=effective_api_key)
 
         # Formulate system instruction for tutor persona
         system_prompt = (

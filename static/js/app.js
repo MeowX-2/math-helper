@@ -328,9 +328,15 @@ async function sendTutorMessage() {
     sendBtn.disabled = true;
 
     try {
+        const userApiKey = localStorage.getItem('user_gemini_api_key') || '';
+        const headers = { 'Content-Type': 'application/json' };
+        if (userApiKey) {
+            headers['X-Gemini-API-Key'] = userApiKey;
+        }
+
         const res = await fetch('/get_hint', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: headers,
             body: JSON.stringify({ prompt })
         });
         const data = await res.json();
@@ -365,6 +371,50 @@ async function sendTutorMessage() {
         sendBtn.disabled = false;
         input.focus();
     }
+}
+
+// ==============================================================================
+// Settings API Key Modal Logic
+// ==============================================================================
+
+/** Open custom API Key settings modal dialog. */
+function openSettingsModal() {
+    const customInput = document.getElementById('custom-api-key');
+    if (customInput) {
+        customInput.value = localStorage.getItem('user_gemini_api_key') || '';
+    }
+    document.getElementById('settings-modal').classList.add('active');
+}
+
+/** Close custom API Key settings modal dialog. */
+function closeSettingsModal() {
+    document.getElementById('settings-modal').classList.remove('active');
+}
+
+/**
+ * Handle form submission for saving custom client API Key into localStorage.
+ * @param {Event} e - Form submit event.
+ */
+function handleSaveApiKey(e) {
+    e.preventDefault();
+    const key = document.getElementById('custom-api-key').value.trim();
+    if (key) {
+        localStorage.setItem('user_gemini_api_key', key);
+        showToast('Custom Gemini API Key saved locally!', 'success');
+    } else {
+        localStorage.removeItem('user_gemini_api_key');
+        showToast('Using default server API Key', 'info');
+    }
+    closeSettingsModal();
+}
+
+/** Clear custom API Key from localStorage. */
+function clearApiKey() {
+    localStorage.removeItem('user_gemini_api_key');
+    const customInput = document.getElementById('custom-api-key');
+    if (customInput) customInput.value = '';
+    showToast('Custom API Key cleared', 'info');
+    closeSettingsModal();
 }
 
 // ==============================================================================
@@ -439,6 +489,7 @@ document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
         closeReader();
         closePublishModal();
+        closeSettingsModal();
         const tutorDrawer = document.getElementById('tutor-drawer');
         if (tutorDrawer && tutorDrawer.classList.contains('active')) {
             toggleTutorDrawer();

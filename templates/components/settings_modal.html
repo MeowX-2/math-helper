@@ -1,0 +1,23 @@
+<!-- API Key Settings Modal Dialog -->
+<div class="modal-overlay" id="settings-modal">
+    <div class="modal-card">
+        <!-- Close Button -->
+        <button style="position: absolute; top: 1.2rem; right: 1.5rem; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--text-muted);" onclick="closeSettingsModal()" title="Close Settings">✕</button>
+        <h2 class="modal-title">⚙️ API Settings</h2>
+
+        <form onsubmit="handleSaveApiKey(event)">
+            <div class="form-group">
+                <label for="custom-api-key">Your Google Gemini API Key</label>
+                <input type="password" id="custom-api-key" placeholder="AIzaSy..." autocomplete="off">
+                <p style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.4rem;">
+                    Your key is saved locally in your browser/app state. Leave empty to use the server's default environment key.
+                </p>
+            </div>
+
+            <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem;">
+                <button type="submit" class="btn-submit-story" style="flex: 1; margin-top: 0;">Save API Key</button>
+                <button type="button" onclick="clearApiKey()" class="theme-toggle-btn" style="padding: 0.85rem 1.2rem;">Clear Key</button>
+            </div>
+        </form>
+    </div>
+</div>
