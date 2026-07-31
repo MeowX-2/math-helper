@@ -221,6 +221,63 @@ def create_blog():
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
 
+def clean_ai_response(text):
+    """
+    Sanitize and strip any AI model chain-of-thought, internal monologue,
+    meta-reasoning bullet points, or scratchpad tags.
+    """
+    if not text:
+        return ""
+        
+    # Strip <thought>...</thought> or <thinking>...</thinking> tags if present
+    text = re.sub(r'<thought>.*?</thought>', '', text, flags=re.DOTALL | re.IGNORECASE)
+    text = re.sub(r'<thinking>.*?</thinking>', '', text, flags=re.DOTALL | re.IGNORECASE)
+
+    # Remove meta-bullet headers output by thinking models
+    lines = text.split('\n')
+    clean_lines = []
+    in_meta_block = True
+    
+    for line in lines:
+        stripped = line.strip()
+        # Detect meta-reasoning bullet points or scratchpad headers
+        if in_meta_block and (
+            stripped.startswith('- Role:') or 
+            stripped.startswith('• Role:') or 
+            stripped.startswith('* Role:') or 
+            stripped.startswith('- Task:') or 
+            stripped.startswith('- Constraint:') or 
+            stripped.startswith('Constraint:') or 
+            stripped.startswith('- Wait,') or 
+            stripped.startswith('- If there is') or 
+            stripped.startswith('- I should') or 
+            stripped.startswith('Decision:') or 
+            stripped.startswith('Thinking Process:') or 
+            stripped.startswith('Thought:')
+        ):
+            continue
+        
+        # Once normal text starts, keep all lines
+        if stripped and not (
+            stripped.startswith('- Role:') or 
+            stripped.startswith('• Role:') or 
+            stripped.startswith('- Task:') or 
+            stripped.startswith('- Constraint:') or 
+            stripped.startswith('Constraint:') or 
+            stripped.startswith('- Wait,') or 
+            stripped.startswith('- If there is') or 
+            stripped.startswith('- I should') or 
+            stripped.startswith('Decision:')
+        ):
+            in_meta_block = False
+            
+        if not in_meta_block:
+            clean_lines.append(line)
+        
+    result = '\n'.join(clean_lines).strip()
+    return result if result else text.strip()
+
+
 def generate_claude_hint(user_input, api_key):
     """
     Generate math hint using Anthropic Claude API (https://api.anthropic.com/v1/messages).
@@ -230,12 +287,12 @@ def generate_claude_hint(user_input, api_key):
     import urllib.error
 
     system_prompt = (
-        "You are HintSpark, a concise and direct AI math tutor.\n"
-        "CRITICAL INSTRUCTIONS:\n"
-        "1. Give ONLY a short, encouraging hint focused directly on helping the user solve the problem.\n"
-        "2. Do NOT output meta-information, bullet points about your role/task, thought process, internal planning, or multiple redundant methods.\n"
-        "3. Do NOT reveal the full step-by-step solution immediately unless explicitly asked.\n"
-        "4. ALWAYS format mathematical expressions using standard LaTeX ($...$ for inline math, $$...$$ for display math)."
+        "You are HintSpark, a helpful AI math tutor.\n"
+        "STRICT OUTPUT RULES:\n"
+        "- Respond ONLY with your final message to the user.\n"
+        "- NEVER output your thought process, internal monologue, constraint analysis, or task bullet points.\n"
+        "- If the user greets you (e.g., 'hi', 'hello'), respond with a friendly greeting and ask how you can help with math.\n"
+        "- If given a math problem, provide a short, direct hint formatted with LaTeX ($...$ for inline, $$...$$ for display)."
     )
 
     models_to_try = [
@@ -318,7 +375,7 @@ def get_hint():
                 response_text = generate_claude_hint(user_input, effective_api_key)
                 return jsonify({
                     'status': 'success',
-                    'response': response_text,
+                    'response': clean_ai_response(response_text),
                     'provider': 'Anthropic Claude'
                 })
             except Exception as e:
@@ -332,12 +389,12 @@ def get_hint():
 
         # Formulate system instruction for tutor persona
         system_prompt = (
-            "You are HintSpark, a concise and direct AI math tutor.\n"
-            "CRITICAL INSTRUCTIONS:\n"
-            "1. Give ONLY a short, encouraging hint focused directly on helping the user solve the problem.\n"
-            "2. Do NOT output meta-information, bullet points about your role/task, thought process, internal planning, or multiple redundant methods.\n"
-            "3. Do NOT reveal the full step-by-step solution immediately unless explicitly asked.\n"
-            "4. ALWAYS format mathematical expressions using standard LaTeX ($...$ for inline math, $$...$$ for display math)."
+            "You are HintSpark, a helpful AI math tutor.\n"
+            "STRICT OUTPUT DIRECTIVE:\n"
+            "- Output ONLY your final direct response to the user.\n"
+            "- NEVER include internal thinking, scratchpads, role/task bullet points, reasoning steps, constraints, or decisions in your output.\n"
+            "- If user greets you, respond politely and ask how you can assist with math.\n"
+            "- If given a math problem, provide a short, clear hint formatted with standard LaTeX ($...$ or $$...$$)."
         )
 
         # Gemini model candidate list to attempt dynamically
@@ -390,7 +447,7 @@ def get_hint():
         if response_text:
             return jsonify({
                 'status': 'success',
-                'response': response_text
+                'response': clean_ai_response(response_text)
             })
         else:
             err_msg = str(last_error) if last_error else 'No available Gemini model could process the request.'
