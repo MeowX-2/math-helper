@@ -1,0 +1,84 @@
+[
+  {
+    "id": "105",
+    "title": "Mastering Mathematical Thinking: Proofs, Equations & AI Hints",
+    "subtitle": "A master showcase article illustrating inline LaTeX, display math blocks, matrices, summations, and interactive AI tutoring.",
+    "author": "Dr. Sophia Lin",
+    "category": "Calculus",
+    "tags": [
+      "Showcase",
+      "LaTeX",
+      "Calculus",
+      "Algebra",
+      "NumberTheory",
+      "Geometry"
+    ],
+    "date": "July 31, 2026",
+    "read_time": "5 min read",
+    "content": "Welcome to **HintSpark**, where mathematics meets intuitive visualization and AI-guided problem solving! This article serves as a comprehensive feature showcase.\n\n### 1. Beautiful Inline & Display LaTeX\nMathematics requires precise notation. Inline expressions like $e^{i\\pi} + 1 = 0$ integrate seamlessly into text, while display blocks highlight central theorems:\n\n$$\\int_{-\\infty}^{\\infty} e^{-x^2} \\, dx = \\sqrt{\\pi}$$\n\nThis famous Gaussian integral connects exponential decay with the geometry of a circle via polar coordinates ($r^2 = x^2 + y^2$).\n\n### 2. Linear Algebra & Matrices\nLinear transformations act by stretching, rotating, and scaling coordinate space. Consider a $2 \\times 2$ matrix transformation:\n\n$$\\begin{bmatrix} a & b \\\\ c & d \\end{bmatrix} \\begin{bmatrix} x \\\\ y \\end{bmatrix} = \\begin{bmatrix} ax + by \\\\ cx + dy \\end{bmatrix}$$\n\nThe determinant $\\det(A) = ad - bc$ measures how the area of a unit square changes under the transformation. If $\\det(A) = 0$, space collapses onto a line!\n\n### 3. Number Theory & Infinite Series\nThe Riemann Zeta function links prime number distribution to complex analysis:\n\n$$\\zeta(s) = \\sum_{n=1}^{\\infty} \\frac{1}{n^s} = \\prod_{p \\text{ prime}} \\frac{1}{1 - p^{-s}}$$\n\n### 4. Interactive AI Math Assistant\nNeed a hint on a problem like $\\frac{d}{dx}[x^2 \\sin(x)]$? Open the **AI Math Assistant** drawer from the sidebar! Ask any prompt, and HintSpark will guide you step-by-step with LaTeX hints without spoiling the final answer."
+  },
+  {
+    "id": "104",
+    "title": "The Gaussian Integral and the Geometry of Infinity",
+    "subtitle": "Discovering why the area under the normal distribution bell curve equals the square root of pi.",
+    "author": "Marcus Vance",
+    "category": "Calculus",
+    "tags": [
+      "Calculus",
+      "Integration",
+      "Gaussian",
+      "Probability"
+    ],
+    "date": "July 30, 2026",
+    "read_time": "4 min read",
+    "content": "In calculus and statistics, the normal distribution curve is defined by $f(x) = e^{-x^2}$. Evaluating its total area requires calculating:\n\n$$I = \\int_{-\\infty}^{\\infty} e^{-x^2} \\, dx$$\n\nDirect anti-differentiation is impossible in terms of elementary functions. The stroke of genius, credited to Siméon Denis Poisson, is to square the integral and evaluate it in two dimensions using polar coordinates:\n\n$$I^2 = \\left( \\int_{-\\infty}^{\\infty} e^{-x^2} dx \\right) \\left( \\int_{-\\infty}^{\\infty} e^{-y^2} dy \\right) = \\int_{-\\infty}^{\\infty} \\int_{-\\infty}^{\\infty} e^{-(x^2 + y^2)} dx \\, dy$$\n\nSwitching to polar coordinates where $x^2 + y^2 = r^2$ and $dx \\, dy = r \\, dr \\, d\\theta$:\n\n$$I^2 = \\int_{0}^{2\\pi} d\\theta \\int_{0}^{\\infty} r e^{-r^2} dr = 2\\pi \\cdot \\left[ -\\frac{1}{2} e^{-r^2} \\right]_{0}^{\\infty} = 2\\pi \\cdot \\frac{1}{2} = \\pi$$\n\nTaking the positive square root yields the celebrated result $I = \\sqrt{\\pi}$."
+  },
+  {
+    "id": "103",
+    "title": "The Strange Geometry of Euler's Identity",
+    "subtitle": "How exponential growth, complex rotations, and pi converge into the most elegant equation in mathematics.",
+    "author": "Dr. Sophia Lin",
+    "category": "NumberTheory",
+    "tags": [
+      "NumberTheory",
+      "Euler",
+      "Complex Numbers",
+      "Analysis"
+    ],
+    "date": "July 29, 2026",
+    "read_time": "3 min read",
+    "content": "Euler's identity $e^{i\\pi} + 1 = 0$ is often described as the mathematical equivalent of Shakespeare's sonnets. It links five fundamental mathematical constants ($e$, $i$, $\\pi$, $1$, and $0$) into a single statement.\n\n$$\\text{Euler's Formula: } e^{ix} = \\cos(x) + i\\sin(x)$$\n\nEvaluating at $x = \\pi$:\n\n$$e^{i\\pi} = \\cos(\\pi) + i\\sin(\\pi) = -1 + 0i = -1$$\n\nGeometrically, multiplying a complex number by $e^{i\\theta}$ rotates it by $\\theta$ radians in the complex plane. A rotation of $\\pi$ radians (180 degrees) flips direction from $+1$ to $-1$."
+  },
+  {
+    "id": "102",
+    "title": "Visualizing Vector Fields, Matrices, and Eigenvalues",
+    "subtitle": "Understanding how eigenvectors maintain direction while matrices stretch space.",
+    "author": "Elena Rostova",
+    "category": "Algebra",
+    "tags": [
+      "Algebra",
+      "LinearAlgebra",
+      "Eigenvalues",
+      "Matrices"
+    ],
+    "date": "July 28, 2026",
+    "read_time": "4 min read",
+    "content": "When a matrix $A$ acts on a vector $\\mathbf{v}$, it typically changes both the magnitude and direction of the vector. However, for certain special vectors called **eigenvectors**, the transformation only scales the vector without changing its orientation:\n\n$$A \\mathbf{v} = \\lambda \\mathbf{v}$$\n\nHere $\\lambda$ is the **eigenvalue**. To find these special scalar values, we solve the characteristic equation:\n\n$$\\det(A - \\lambda I) = 0$$\n\nEigenvalues reveal fundamental properties of physical systems—from quantum state energy levels to Google's PageRank algorithm!"
+  },
+  {
+    "id": "101",
+    "title": "Non-Euclidean Geometries and Curved Space",
+    "subtitle": "What happens when parallel lines intersect and triangles have more than 180 degrees.",
+    "author": "Prof. Alan Turing",
+    "category": "Geometry",
+    "tags": [
+      "Geometry",
+      "Topology",
+      "Curvature",
+      "Relativity"
+    ],
+    "date": "July 27, 2026",
+    "read_time": "3 min read",
+    "content": "Euclid's Fifth Postulate assumed that through any point not on a line, there passes exactly one parallel line. For over two millennia, mathematicians attempted to prove this from simpler axioms.\n\nIn the 19th century, Gauss, Lobachevsky, and Riemann realized that alternative, fully consistent geometries exist on curved surfaces:\n\n1. **Spherical Geometry (Positive Curvature)**: Triangle interior angles sum to $> 180^\\circ$. Parallel lines converge.\n2. **Hyperbolic Geometry (Negative Curvature)**: Triangle angles sum to $< 180^\\circ$. Infinitely many parallel lines pass through a single point.\n\nEinstein later used Riemannian geometry to formulate General Relativity: mass curves spacetime itself!"
+  }
+]

@@ -1,0 +1,40 @@
+<!-- Left Fixed Navigation Sidebar -->
+<aside id="sidebar">
+    <!-- Brand Title & Home Action -->
+    <a class="brand-header" onclick="resetTopic()" title="HintSpark Home">
+        <div class="brand-icon">∑</div>
+        <div class="brand-title-wrap">
+            <span class="brand-title">HintSpark</span>
+            <span class="brand-badge">AI v2.0</span>
+        </div>
+    </a>
+
+    <!-- Main Category Navigation Links -->
+    <div class="nav-section-title">Explore Topics</div>
+    <ul class="nav-list">
+        <li><a class="nav-item active" onclick="selectTopic('All', this)"><span class="icon">📰</span> Feed & Stories</a></li>
+        <li><a class="nav-item" onclick="selectTopic('NumberTheory', this)"><span class="icon">🔢</span> Number Theory</a></li>
+        <li><a class="nav-item" onclick="selectTopic('Calculus', this)"><span class="icon">♾️</span> Calculus</a></li>
+        <li><a class="nav-item" onclick="selectTopic('Algebra', this)"><span class="icon">📊</span> Algebra</a></li>
+        <li><a class="nav-item" onclick="selectTopic('Geometry', this)"><span class="icon">📐</span> Geometry</a></li>
+    </ul>
+
+    <!-- Quick Feature Shortcuts -->
+    <div class="nav-section-title">Interactive Tools</div>
+    <ul class="nav-list">
+        <li><a class="nav-item" onclick="toggleTutorDrawer()"><span class="icon">🤖</span> AI Math Assistant</a></li>
+        <li><a class="nav-item" onclick="openPublishModal()"><span class="icon">✍️</span> Write Essay</a></li>
+    </ul>
+
+    <!-- Action Buttons & Theme Toggler -->
+    <div class="sidebar-actions">
+        <button class="btn-sidebar-primary" onclick="openPublishModal()">
+            <span>+</span> Publish Story
+        </button>
+
+        <button class="theme-toggle-btn" onclick="toggleTheme()">
+            <span id="theme-text">🌙 Dark Mode</span>
+            <span id="theme-icon">✨</span>
+        </button>
+    </div>
+</aside>

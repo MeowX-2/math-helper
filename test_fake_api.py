@@ -1,4 +1,4 @@
-import google.generativeai as genai
+import google.genai as genai
 genai.configure(api_key="abracadabra")
 model = genai.GenerativeModel('gemini-1.5-flash')
 try:

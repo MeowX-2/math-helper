@@ -1,304 +1,58 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HintSpark ✨ — Math Hint Tutor</title>
-    <!-- KaTeX CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
-    <style>
-        /* Basic styling for the chat app */
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f4f4f9;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-        #chat-container {
-            width: 480px;
-            height: 720px;
-            border: 1px solid #ccc;
-            border-radius: 12px;
-            display: flex;
-            flex-direction: column;
-            background-color: #fff;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
-        }
+    <title>HintSpark — Mathematical Insights & AI Assistant</title>
+    
+    <!-- Industry Standard Typography: Outfit (Display & Headings), Plus Jakarta Sans (UI & Controls), Inter (Body & Content), JetBrains Mono (Code & Metadata) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- KaTeX Mathematical Notation Renderer -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    
+    <!-- Marked.js Markdown Parser -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
-        /* Header area with title and model selector */
-        #header {
-            padding: 12px 16px;
-            border-bottom: 1px solid #eee;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        h1 {
-            text-align: center;
-            color: #333;
-            font-size: 1.4em;
-            margin: 0;
-        }
-        #model-selector-row {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        #model-selector-row label {
-            font-size: 0.8em;
-            color: #666;
-            white-space: nowrap;
-            font-weight: 500;
-        }
-        #model-select {
-            flex-grow: 1;
-            padding: 6px 10px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 0.82em;
-            background-color: #f9f9fb;
-            color: #333;
-            cursor: pointer;
-            outline: none;
-            appearance: none;
-            -webkit-appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23666' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 10px center;
-            padding-right: 28px;
-        }
-        #model-select:focus {
-            border-color: #007bff;
-            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.15);
-        }
-
-        #chat-box {
-            flex-grow: 1;
-            padding: 16px 20px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        .message {
-            padding: 10px 15px;
-            border-radius: 18px;
-            max-width: 85%;
-            line-height: 1.5;
-            word-wrap: break-word;
-        }
-        .user-message {
-            background-color: #007bff;
-            color: white;
-            align-self: flex-end;
-        }
-        .bot-message {
-            background-color: #e9e9eb;
-            color: #333;
-            align-self: flex-start;
-        }
-        /* LaTeX rendered content inside bot messages */
-        .bot-message .katex-display {
-            margin: 8px 0;
-            overflow-x: auto;
-            overflow-y: hidden;
-        }
-        .bot-message .katex {
-            font-size: 1.05em;
-        }
-        .typing-indicator {
-            align-self: flex-start;
-            color: #999;
-            font-style: italic;
-            font-size: 0.9em;
-            padding: 8px 15px;
-        }
-
-        #input-area {
-            display: flex;
-            padding: 10px;
-            border-top: 1px solid #eee;
-            gap: 10px;
-        }
-        #problem-input {
-            flex-grow: 1;
-            border: 1px solid #ccc;
-            border-radius: 18px;
-            padding: 10px 15px;
-            font-size: 1em;
-        }
-        #problem-input:focus {
-            outline: none;
-            border-color: #007bff;
-        }
-        #submit-btn {
-            border: none;
-            background-color: #007bff;
-            color: white;
-            padding: 10px 15px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-weight: bold;
-            transition: background-color 0.15s;
-        }
-        #submit-btn:hover {
-            background-color: #0056b3;
-        }
-        #submit-btn:disabled {
-            background-color: #a0c4ff;
-            cursor: not-allowed;
-        }
-    </style>
+    <!-- External Application Stylesheet & Client Script -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script defer src="{{ url_for('static', filename='js/app.js') }}"></script>
 </head>
 <body>
 
-<div id="chat-container">
-    <div id="header">
-        <h1>HintSpark ✨</h1>
-        <div id="model-selector-row">
-            <label for="model-select">Model:</label>
-            <select id="model-select">
-                <option value="gemini-2.5-flash">Loading models...</option>
-            </select>
-        </div>
+    <!-- Main Dashboard Layout Grid -->
+    <div id="app-layout">
+        <!-- Sidebar Navigation Component -->
+        {% include 'components/sidebar.html' %}
+
+        <!-- Main Workspace Area -->
+        <main id="main-content">
+            <!-- Header Component -->
+            {% include 'components/header.html' %}
+
+            <!-- Featured Hero Story Component -->
+            {% include 'components/hero.html' %}
+
+            <!-- Dynamic Articles Feed Grid -->
+            <div class="section-label-bar" id="grid-label">Recent Math Articles</div>
+            <section id="articles-grid">
+                <!-- Dynamically populated via app.js fetchArticles() -->
+            </section>
+        </main>
     </div>
-    <div id="chat-box">
-        <div class="message bot-message">Hello! Give me a math problem and I'll give you a hint.</div>
-    </div>
-    <form id="input-area" onsubmit="return false;">
-        <input type="text" id="problem-input" placeholder="e.g., How to solve x^2 - 4 = 0?">
-        <button id="submit-btn" type="submit">➤</button>
-    </form>
-</div>
 
-<!-- KaTeX JS -->
-<script src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"></script>
+    <!-- AI Math Assistant Drawer Component -->
+    {% include 'components/ai_tutor.html' %}
 
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const chatBox = document.getElementById('chat-box');
-        const problemInput = document.getElementById('problem-input');
-        const inputForm = document.getElementById('input-area');
-        const submitBtn = document.getElementById('submit-btn');
-        const modelSelect = document.getElementById('model-select');
+    <!-- Publish Article Modal Component -->
+    {% include 'components/publish_modal.html' %}
 
-        // Fetch available models on page load
-        const loadModels = async () => {
-            try {
-                const res = await fetch('/models');
-                const data = await res.json();
-                if (data.status === 'success' && data.models.length > 0) {
-                    modelSelect.innerHTML = '';
-                    data.models.forEach(name => {
-                        const opt = document.createElement('option');
-                        opt.value = name;
-                        // Display a cleaner name (strip "models/" prefix if present)
-                        opt.textContent = name.replace(/^models\//, '');
-                        modelSelect.appendChild(opt);
-                    });
-                    // Default to gemini-2.5-flash if available (exact match first)
-                    const defaultModel = data.models.find(m => m === 'models/gemini-2.5-flash')
-                        || data.models.find(m => m.includes('gemini-2.5-flash'));
-                    if (defaultModel) modelSelect.value = defaultModel;
-                }
-            } catch (e) {
-                console.error('Failed to load models:', e);
-            }
-        };
-        loadModels();
-
-        const addMessage = (text, sender) => {
-            const messageElement = document.createElement('div');
-            messageElement.classList.add('message', `${sender}-message`);
-
-            if (sender === 'bot') {
-                // Use innerHTML so KaTeX auto-render can find delimiters
-                messageElement.innerHTML = text
-                    .replace(/&/g, '&amp;')
-                    .replace(/</g, '&lt;')
-                    .replace(/>/g, '&gt;')
-                    .replace(/\n/g, '<br>');
-
-                chatBox.appendChild(messageElement);
-
-                // Render LaTeX in the new message
-                renderMathInElement(messageElement, {
-                    delimiters: [
-                        { left: '$$', right: '$$', display: true },
-                        { left: '$', right: '$', display: false },
-                        { left: '\\(', right: '\\)', display: false },
-                        { left: '\\[', right: '\\]', display: true },
-                    ],
-                    throwOnError: false,
-                });
-            } else {
-                messageElement.textContent = text;
-                chatBox.appendChild(messageElement);
-            }
-
-            chatBox.scrollTop = chatBox.scrollHeight;
-        };
-
-        const showTyping = () => {
-            const el = document.createElement('div');
-            el.classList.add('typing-indicator');
-            el.id = 'typing';
-            el.textContent = 'Thinking...';
-            chatBox.appendChild(el);
-            chatBox.scrollTop = chatBox.scrollHeight;
-        };
-        const hideTyping = () => {
-            const el = document.getElementById('typing');
-            if (el) el.remove();
-        };
-
-        const handleUserInput = async () => {
-            const userInput = problemInput.value.trim();
-            if (!userInput) return;
-
-            addMessage(userInput, 'user');
-            problemInput.value = '';
-            submitBtn.disabled = true;
-            showTyping();
-
-            try {
-                const response = await fetch('/get_hint', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        prompt: userInput,
-                        model: modelSelect.value,
-                    }),
-                });
-
-                hideTyping();
-
-                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-
-                const data = await response.json();
-
-                if (data.status === 'success') {
-                    addMessage(data.response, 'bot');
-                } else {
-                    addMessage(`Error: ${data.message}`, 'bot');
-                }
-            } catch (error) {
-                hideTyping();
-                console.error('Error fetching hint:', error);
-                addMessage('Sorry, something went wrong while getting your hint.', 'bot');
-            } finally {
-                submitBtn.disabled = false;
-                problemInput.focus();
-            }
-        };
-
-        inputForm.addEventListener('submit', handleUserInput);
-    });
-</script>
+    <!-- Article Reader Overlay Component -->
+    {% include 'components/reader_modal.html' %}
 
 </body>
 </html>

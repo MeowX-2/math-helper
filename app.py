@@ -1,72 +1,285 @@
+"""
+HintSpark — Math Insights & AI Assistant Backend
+=================================================
+Flask web application serving mathematical stories, articles, and an interactive 
+AI tutor powered by the Google Gemini API.
+"""
+
 import os
+import json
+import time
+import math
+from datetime import datetime
 from flask import Flask, render_template, request, jsonify
-from google import genai
+import google.generativeai as genai
+from google.generativeai.types import generation_types
 from dotenv import load_dotenv
 
+# Load environment variables from .env file
 load_dotenv()
 
 app = Flask(__name__)
 
-# Configure your Gemini API Key
-client = genai.Client(api_key=os.getenv("YOUR_GEMINI_API_KEY"))
+# Configure the Google Gemini API key
+# Accepts 'GEMINI_API_KEY' (recommended) or 'API' (legacy fallback)
+api_key = os.getenv("GEMINI_API_KEY") or os.getenv("API")
+if api_key:
+    genai.configure(api_key=api_key)
+
+# Path to local JSON storage for blog posts
+DATA_FILE = os.path.join(os.path.dirname(__file__), 'data', 'blogs.json')
+
+
+# ==============================================================================
+# Helper Functions: Data Storage & Math Read-Time Calculation
+# ==============================================================================
+
+def load_blogs():
+    """
+    Load blog entries from local JSON storage file.
+    Returns an empty list if the file does not exist or fails to parse.
+    """
+    if not os.path.exists(DATA_FILE):
+        return []
+    try:
+        with open(DATA_FILE, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except Exception as e:
+        print(f"Error reading blogs data: {e}")
+        return []
+
+
+def save_blogs(blogs):
+    """
+    Save list of blog objects into local JSON storage file.
+    Automatically creates the parent directory if missing.
+    """
+    os.makedirs(os.path.dirname(DATA_FILE), exist_ok=True)
+    with open(DATA_FILE, 'w', encoding='utf-8') as f:
+        json.dump(blogs, f, indent=2)
+
+
+def calculate_read_time(content):
+    """
+    Calculate estimated reading time based on word count and inline/display LaTeX math blocks.
+    
+    Formula:
+    - Words: ~150 words per minute
+    - Inline Math ($...$): ~15 seconds per expression
+    - Display Math ($$...$$): ~30 seconds per block
+    """
+    if not content:
+        return "1 min read"
+        
+    words = len(content.split())
+    
+    # Estimate LaTeX complexity
+    display_math = content.count('$$') // 2
+    raw_dollars = content.count('$') - (display_math * 4)
+    inline_math = max(0, raw_dollars // 2)
+
+    total_seconds = (words / 150.0 * 60) + (inline_math * 15) + (display_math * 30)
+    minutes = max(1, math.ceil(total_seconds / 60))
+    return f"{minutes} min read"
+
+
+# ==============================================================================
+# Web Routes & REST API Endpoints
+# ==============================================================================
 
 @app.route('/')
 def index():
+    """Render main web page application shell."""
     return render_template('index.html')
 
-@app.route('/models', methods=['GET'])
-def list_models():
-    try:
-        # Exclude non-text models (TTS, robotics, image-only, computer-use)
-        EXCLUDE_KEYWORDS = ['tts', 'robotics', 'computer-use', '-image']
 
-        models = client.models.list()
-        model_names = []
-        for m in models:
-            # Only include Gemini text models that support generateContent
-            actions = m.supported_actions or []
-            is_gemini = m.name and m.name.startswith('models/gemini')
-            supports_generate = 'generateContent' in actions
-            is_excluded = any(kw in m.name for kw in EXCLUDE_KEYWORDS)
-            if is_gemini and supports_generate and not is_excluded:
-                model_names.append(m.name)
-        model_names.sort(reverse=True)
-        return jsonify({'status': 'success', 'models': model_names})
+@app.route('/api/blogs', methods=['GET'])
+def get_blogs():
+    """
+    GET /api/blogs
+    Fetch articles filtered by category and search keyword, sorted by date descending.
+    
+    Query Params:
+    - category (optional): Category filter (e.g. 'Calculus', 'Algebra', 'All')
+    - search (optional): Keyword search query matching title, subtitle, content, author, or tags
+    """
+    category = request.args.get('category', 'All').strip()
+    search = request.args.get('search', '').strip().lower()
+    
+    blogs = load_blogs()
+
+    # Filter by category if specified
+    if category and category != 'All':
+        blogs = [b for b in blogs if b.get('category', '').lower() == category.lower()]
+        
+    # Filter by search string if provided
+    if search:
+        blogs = [
+            b for b in blogs
+            if search in b.get('title', '').lower()
+            or search in b.get('subtitle', '').lower()
+            or search in b.get('content', '').lower()
+            or search in b.get('author', '').lower()
+            or any(search in tag.lower() for tag in b.get('tags', []))
+        ]
+
+    # Return sorted by ID/Timestamp descending
+    blogs.sort(key=lambda x: x.get('id', '0'), reverse=True)
+    return jsonify({'status': 'success', 'blogs': blogs})
+
+
+@app.route('/api/blogs', methods=['POST'])
+def create_blog():
+    """
+    POST /api/blogs
+    Publish a new article post.
+    
+    Payload (JSON):
+    - title (required): Article title
+    - subtitle (optional): Short description
+    - author (optional): Author name (defaults to 'Anonymous Math Writer')
+    - category (optional): Article category
+    - tags (optional): List or comma-separated string of tags
+    - content (required): Main article text (supports LaTeX)
+    """
+    try:
+        data = request.json or {}
+        title = data.get('title', '').strip()
+        subtitle = data.get('subtitle', '').strip()
+        author = data.get('author', '').strip() or 'Anonymous Math Writer'
+        category = data.get('category', 'General').strip()
+        tags_raw = data.get('tags', [])
+        content = data.get('content', '').strip()
+
+        if not title or not content:
+            return jsonify({'status': 'error', 'message': 'Title and content are required.'}), 400
+
+        # Parse tags input format
+        if isinstance(tags_raw, str):
+            tags = [t.strip() for t in tags_raw.split(',') if t.strip()]
+        else:
+            tags = [str(t).strip() for t in tags_raw if str(t).strip()]
+
+        blogs = load_blogs()
+        new_blog = {
+            'id': str(int(time.time() * 1000)),
+            'title': title,
+            'subtitle': subtitle,
+            'author': author,
+            'category': category,
+            'tags': tags if tags else [category],
+            'date': datetime.now().strftime('%B %d, %Y'),
+            'read_time': calculate_read_time(content),
+            'content': content
+        }
+        blogs.insert(0, new_blog)
+        save_blogs(blogs)
+
+        return jsonify({'status': 'success', 'blog': new_blog}), 201
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
+
 @app.route('/get_hint', methods=['POST'])
 def get_hint():
+    """
+    POST /get_hint
+    Generate a guided hint for a math problem using Google Gemini API.
+    Does NOT reveal the direct answer immediately; acts as a math tutor.
+    """
     try:
-        data = request.json
-        user_input = data.get('prompt', '')
-        selected_model = data.get('model', 'gemini-2.5-flash')
+        data = request.json or {}
+        user_input = data.get('prompt', '').strip()
+        
+        if not user_input:
+            return jsonify({
+                'status': 'error',
+                'message': 'Prompt cannot be empty.'
+            }), 400
 
-        # Formulate the strict hint-only prompt with LaTeX preference
+        # Formulate system instruction for tutor persona
         system_prompt = (
-            "You are a math tutor. Your task is to provide a helpful hint for the "
-            "following math problem. Do not provide the solution. Focus on guiding "
-            "the user to solve the problem themselves.\n\n"
+            "You are a helpful and friendly AI math tutor named HintSpark. "
+            "Your task is to provide a helpful hint for the math problem provided by the user. "
+            "Do not give the full step-by-step solution immediately unless asked. "
+            "Guide the user so they can figure out the solution themselves.\n\n"
             "IMPORTANT: When writing mathematical expressions, ALWAYS use LaTeX notation. "
-            "Use $...$ for inline math and $$...$$ for display math. For example, "
-            "write $x^2 - 4 = 0$ instead of x^2 - 4 = 0."
-        )
-        full_prompt = f"{system_prompt}\n\nProblem: {user_input}\n\nHint:"
-
-        response = client.models.generate_content(
-            model=selected_model,
-            contents=full_prompt
+            "Use $...$ for inline math (e.g. $x^2 + y^2 = 1$) and $$...$$ for display math."
         )
 
+        # Gemini model candidate list to attempt dynamically
+        candidate_models = [
+            'gemini-1.5-flash',
+            'gemini-2.0-flash',
+            'gemini-2.5-flash',
+            'gemini-1.5-flash-8b',
+            'gemini-1.5-pro',
+            'models/gemini-1.5-flash',
+            'models/gemini-1.5-flash-latest'
+        ]
+
+        # Discover supported models from API list if possible
+        try:
+            discovered_models = []
+            for m in genai.list_models():
+                if 'generateContent' in m.supported_generation_methods:
+                    name = m.name.replace('models/', '')
+                    discovered_models.append(name)
+                    discovered_models.append(m.name)
+            if discovered_models:
+                candidate_models = discovered_models + [m for m in candidate_models if m not in discovered_models]
+        except Exception as e:
+            print(f"Note: list_models fallback check: {e}")
+
+        response_text = None
+        last_error = None
+
+        # Try generating hint with candidates until one succeeds
+        for model_name in candidate_models:
+            try:
+                model = genai.GenerativeModel(
+                    model_name=model_name,
+                    system_instruction=system_prompt,
+                )
+                res = model.generate_content(
+                    contents=f"Problem: {user_input}\n\nHint:",
+                    generation_config={"candidate_count": 1},
+                    stream=False
+                )
+                if res and hasattr(res, 'text') and res.text:
+                    response_text = res.text
+                    break
+            except Exception as e:
+                print(f"Model {model_name} failed: {e}")
+                last_error = e
+                continue
+
+        if response_text:
+            return jsonify({
+                'status': 'success',
+                'response': response_text
+            })
+        else:
+            err_msg = str(last_error) if last_error else 'No available Gemini model could process the request.'
+            return jsonify({
+                'status': 'error',
+                'message': f'Failed to generate response: {err_msg}'
+            }), 500
+
+    except generation_types.BlockedPromptError as e:
+        print(f"BlockedPromptError: {e}")
         return jsonify({
-            'status': 'success',
-            'response': response.text
-        })
+            'status': 'error',
+            'message': 'The response was blocked due to safety concerns. Please try rephrasing your problem.'
+        }), 400
     except Exception as e:
+        print(f"An unexpected error occurred: {e}")
         return jsonify({
             'status': 'error',
             'message': str(e)
         }), 500
 
+
+# Application entry point
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=5000)

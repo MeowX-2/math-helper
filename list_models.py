@@ -3,12 +3,13 @@ from dotenv import load_dotenv
 import google.generativeai as genai
 
 load_dotenv()
-api_key = os.getenv("YOUR_GEMINI_API_KEY")
+api_key = os.getenv("API")
 genai.configure(api_key=api_key)
 
 try:
-    models = genai.list_models()
-    for m in models:
-        print(m.name)
+    for m in genai.list_models():
+        if 'generateContent' in m.supported_generation_methods:
+            print(m.name)
 except Exception as e:
     print("Error:", e)
+

@@ -1,0 +1,31 @@
+<!-- AI Math Assistant Side Drawer -->
+<div class="ai-tutor-drawer" id="tutor-drawer">
+    <!-- Drawer Header -->
+    <div class="tutor-header">
+        <div class="tutor-header-title">
+            <span class="tutor-status-dot"></span>
+            <span>HintSpark AI Assistant</span>
+        </div>
+        <button onclick="toggleTutorDrawer()" class="tutor-close-btn" title="Close AI Assistant">✕</button>
+    </div>
+
+    <!-- Message Stream Container -->
+    <div class="tutor-messages" id="tutor-messages">
+        <div class="tutor-msg tutor-ai-msg">
+            Hello! I am your AI math tutor. Ask me any equation, proof concept, or math problem prompt!
+        </div>
+    </div>
+
+    <!-- Quick Suggest Chips -->
+    <div class="tutor-chips-bar">
+        <button class="tutor-chip" onclick="setTutorPrompt('How do I solve $x^2 - 5x + 6 = 0$?')">Algebra</button>
+        <button class="tutor-chip" onclick="setTutorPrompt('Explain the intuition behind $\\int x^2 dx$')">Calculus</button>
+        <button class="tutor-chip" onclick="setTutorPrompt('Why is $e^{i\\pi} + 1 = 0$ true?')">Euler</button>
+    </div>
+
+    <!-- Chat Input Form -->
+    <div class="tutor-input-bar">
+        <input type="text" id="tutor-input" placeholder="Ask a math problem (e.g., $x^2 - 4 = 0$)..." onkeypress="if(event.key==='Enter') sendTutorMessage()">
+        <button id="tutor-send-btn" onclick="sendTutorMessage()">Ask</button>
+    </div>
+</div>

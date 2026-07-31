@@ -1,0 +1,44 @@
+<!-- Publish Article Modal Dialog -->
+<div class="modal-overlay" id="publish-modal">
+    <div class="modal-card">
+        <!-- Close Button -->
+        <button style="position: absolute; top: 1.2rem; right: 1.5rem; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--text-muted);" onclick="closePublishModal()" title="Close Modal">✕</button>
+        <h2 class="modal-title">Publish Math Article</h2>
+
+        <!-- Story Creation Form -->
+        <form onsubmit="handlePublishSubmit(event)">
+            <div class="form-group">
+                <label for="pub-title">Title</label>
+                <input type="text" id="pub-title" placeholder="e.g., The Beauty of Prime Distribution" required>
+            </div>
+
+            <div class="form-group">
+                <label for="pub-subtitle">Subtitle / Excerpt</label>
+                <input type="text" id="pub-subtitle" placeholder="A brief one-sentence overview..." required>
+            </div>
+
+            <div style="display: flex; gap: 1rem;">
+                <div class="form-group" style="flex: 1;">
+                    <label for="pub-author">Author</label>
+                    <input type="text" id="pub-author" placeholder="Your Name">
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label for="pub-category">Category</label>
+                    <select id="pub-category">
+                        <option value="NumberTheory">Number Theory</option>
+                        <option value="Calculus">Calculus</option>
+                        <option value="Algebra">Algebra</option>
+                        <option value="Geometry">Geometry</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="pub-content">Content (Supports LaTeX $inline$ & $$display$$)</label>
+                <textarea id="pub-content" placeholder="Write your mathematical essay here..." required></textarea>
+            </div>
+
+            <button type="submit" class="btn-submit-story">Publish Article</button>
+        </form>
+    </div>
+</div>
