@@ -397,29 +397,14 @@ def get_hint():
             "- If given a math problem, provide a short, clear hint formatted with standard LaTeX ($...$ or $$...$$)."
         )
 
-        # Gemini model candidate list to attempt dynamically
+        # Prioritize 100% free-tier Gemini models (15 RPM / 1500 RPD)
         candidate_models = [
             'gemini-1.5-flash',
             'gemini-2.0-flash',
-            'gemini-2.5-flash',
             'gemini-1.5-flash-8b',
-            'gemini-1.5-pro',
             'models/gemini-1.5-flash',
-            'models/gemini-1.5-flash-latest'
+            'models/gemini-2.0-flash'
         ]
-
-        # Discover supported models from API list if possible
-        try:
-            discovered_models = []
-            for m in genai.list_models():
-                if 'generateContent' in m.supported_generation_methods:
-                    name = m.name.replace('models/', '')
-                    discovered_models.append(name)
-                    discovered_models.append(m.name)
-            if discovered_models:
-                candidate_models = discovered_models + [m for m in candidate_models if m not in discovered_models]
-        except Exception as e:
-            print(f"Note: list_models fallback check: {e}")
 
         response_text = None
         last_error = None
