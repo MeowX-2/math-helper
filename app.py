@@ -221,13 +221,72 @@ def create_blog():
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
 
+def generate_claude_hint(user_input, api_key):
+    """
+    Generate math hint using Anthropic Claude API (https://api.anthropic.com/v1/messages).
+    Supports claude-3-5-sonnet, claude-3-5-haiku, and claude-3-haiku.
+    """
+    import urllib.request
+    import urllib.error
+
+    system_prompt = (
+        "You are a helpful and friendly AI math tutor named HintSpark. "
+        "Your task is to provide a helpful hint for the math problem provided by the user. "
+        "Do not give the full step-by-step solution immediately unless asked. "
+        "Guide the user so they can figure out the solution themselves.\n\n"
+        "IMPORTANT: When writing mathematical expressions, ALWAYS use LaTeX notation. "
+        "Use $...$ for inline math (e.g. $x^2 + y^2 = 1$) and $$...$$ for display math."
+    )
+
+    models_to_try = [
+        "claude-3-5-sonnet-20241022",
+        "claude-3-5-haiku-20241022",
+        "claude-3-haiku-20240307"
+    ]
+
+    last_err = None
+
+    for model in models_to_try:
+        url = "https://api.anthropic.com/v1/messages"
+        headers = {
+            "x-api-key": api_key,
+            "anthropic-version": "2023-06-01",
+            "content-type": "application/json"
+        }
+        payload = {
+            "model": model,
+            "max_tokens": 1024,
+            "system": system_prompt,
+            "messages": [
+                {"role": "user", "content": f"Problem: {user_input}\n\nHint:"}
+            ]
+        }
+        
+        try:
+            req = urllib.request.Request(url, data=json.dumps(payload).encode('utf-8'), headers=headers, method='POST')
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                result = json.loads(resp.read().decode('utf-8'))
+                if result and 'content' in result and len(result['content']) > 0:
+                    return result['content'][0].get('text', '')
+        except urllib.error.HTTPError as e:
+            err_body = e.read().decode('utf-8')
+            print(f"Claude HTTPError ({model}): {e.code} {err_body}")
+            last_err = f"Claude API Error: {err_body}"
+            if e.code == 401:
+                raise Exception("Invalid Claude API Key (401 Unauthorized). Please check your Anthropic API Key.")
+        except Exception as e:
+            print(f"Claude request error ({model}): {e}")
+            last_err = str(e)
+            
+    raise Exception(last_err or "Failed to generate response from Claude API.")
+
+
 @app.route('/get_hint', methods=['POST'])
 def get_hint():
     """
     POST /get_hint
-    Generate a guided hint for a math problem using Google Gemini API.
-    Does NOT reveal the direct answer immediately; acts as a math tutor.
-    Strictly requires a client-provided API key or a configured server environment key.
+    Generate a guided hint for a math problem using Gemini API or Anthropic Claude API.
+    Automatically detects provider based on key format (sk-ant-... -> Claude, AIza... -> Gemini).
     """
     try:
         data = request.json or {}
@@ -241,16 +300,34 @@ def get_hint():
 
         # Resolve API Key: Prefer client-provided key from header/payload, fallback to server .env key
         client_key = (request.headers.get('X-Gemini-API-Key') or data.get('api_key', '')).strip().strip('"').strip("'")
-        env_key = (os.getenv("GEMINI_API_KEY") or os.getenv("API") or '').strip().strip('"').strip("'")
+        env_key = (os.getenv("GEMINI_API_KEY") or os.getenv("CLAUDE_API_KEY") or os.getenv("API") or '').strip().strip('"').strip("'")
         effective_api_key = client_key or env_key
 
         if not effective_api_key:
             return jsonify({
                 'status': 'error',
-                'message': 'API Key Required: Please enter your Google Gemini API key in Settings (⚙️) to activate the AI Tutor.'
+                'message': 'API Key Required: Please enter your Google Gemini or Anthropic Claude API key in Settings (⚙️).'
             }), 400
 
-        # Re-configure genai with effective API key for this request
+        # ----------------------------------------------------------------------
+        # MULTI-PROVIDER ROUTING: Detect Anthropic Claude vs Google Gemini Key
+        # ----------------------------------------------------------------------
+        if effective_api_key.startswith('sk-ant-') or effective_api_key.startswith('sk-'):
+            # Route request to Anthropic Claude Provider
+            try:
+                response_text = generate_claude_hint(user_input, effective_api_key)
+                return jsonify({
+                    'status': 'success',
+                    'response': response_text,
+                    'provider': 'Anthropic Claude'
+                })
+            except Exception as e:
+                return jsonify({
+                    'status': 'error',
+                    'message': str(e)
+                }), 400
+
+        # Re-configure genai with effective API key for Gemini request
         genai.configure(api_key=effective_api_key)
 
         # Formulate system instruction for tutor persona
