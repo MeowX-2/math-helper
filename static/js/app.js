@@ -357,7 +357,15 @@ async function sendTutorMessage() {
             headers: headers,
             body: JSON.stringify({ prompt })
         });
-        const data = await res.json();
+        
+        let data = {};
+        const contentType = res.headers.get('content-type') || '';
+        if (contentType.includes('application/json')) {
+            data = await res.json();
+        } else {
+            const rawText = await res.text();
+            data = { status: 'error', message: `Server Error (${res.status}): Please verify backend server logs.` };
+        }
 
         // Remove loading state
         const activeLoading = document.getElementById('active-loading-msg');
