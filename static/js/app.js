@@ -376,11 +376,12 @@ async function sendTutorMessage() {
         aiMsg.className = 'tutor-msg tutor-ai-msg';
         container.appendChild(aiMsg);
 
-        if (res.ok && data.status === 'success') {
+        if (data.status === 'success' && data.response) {
             renderFormattedContent(aiMsg, data.response);
         } else {
-            renderFormattedContent(aiMsg, `Error: ${data.message || 'Unable to generate hint.'}`);
-            if (data.message && (data.message.includes('API key not valid') || data.message.includes('API Key Required') || data.message.includes('API_KEY_INVALID'))) {
+            const errText = data.message || 'Unable to generate hint. Please check your API key.';
+            renderFormattedContent(aiMsg, `Error: ${errText}`);
+            if (errText.includes('API key') || errText.includes('API Key') || errText.includes('401') || errText.includes('INVALID')) {
                 localStorage.removeItem('user_gemini_api_key');
                 openSettingsModal();
             }

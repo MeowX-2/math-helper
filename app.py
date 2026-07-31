@@ -450,11 +450,11 @@ def get_hint():
                 'response': clean_ai_response(response_text)
             })
         else:
-            err_msg = str(last_error) if last_error else 'No available Gemini model could process the request.'
+            err_msg = str(last_error) if last_error else 'No available AI model could process the request. Please check your API key.'
             return jsonify({
                 'status': 'error',
-                'message': f'Failed to generate response: {err_msg}'
-            }), 500
+                'message': f'AI Service Error: {err_msg}'
+            }), 400
 
     except generation_types.BlockedPromptError as e:
         print(f"BlockedPromptError: {e}")
@@ -466,8 +466,8 @@ def get_hint():
         print(f"An unexpected error occurred: {e}")
         return jsonify({
             'status': 'error',
-            'message': str(e)
-        }), 500
+            'message': f'Tutor Error: {str(e)}'
+        }), 400
 
 
 # Application entry point
