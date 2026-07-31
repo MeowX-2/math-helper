@@ -386,7 +386,13 @@ async function sendTutorMessage() {
 
         const errMsg = document.createElement('div');
         errMsg.className = 'tutor-msg tutor-ai-msg';
-        errMsg.textContent = 'Network error. Please try again.';
+        
+        if (err.name === 'TypeError' && err.message.includes('fetch')) {
+            errMsg.textContent = 'Connection Error: Make sure python app.py is running and your internet connection is active.';
+        } else {
+            errMsg.textContent = `Error: ${err.message || 'Network request failed. Please try again.'}`;
+        }
+        
         container.appendChild(errMsg);
     } finally {
         input.disabled = false;
