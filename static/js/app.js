@@ -403,4 +403,10 @@ function setTutorPrompt(promptText) {
 // Initialize application on DOM ready
 document.addEventListener('DOMContentLoaded', () => {
     fetchArticles();
+    
+    // Register PWA Service Worker for App Mode Installation
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/static/sw.js')
+            .catch(err => console.warn('PWA ServiceWorker note:', err));
+    }
 });

@@ -1,6 +1,6 @@
 # HintSpark ✨ — Mathematical Insights & AI Math Assistant
 
-HintSpark is a modern, responsive web application for reading and publishing mathematical essays, complete with KaTeX expression rendering and an interactive **AI Math Assistant** powered by the **Google Gemini API**. 
+HintSpark is a modern, responsive web application and desktop/PWA app for reading and publishing mathematical essays, complete with KaTeX expression rendering and an interactive **AI Math Assistant** powered by the **Google Gemini API**. 
 
 Unlike standard AI search tools that immediately output solutions, HintSpark acts as a **guided math tutor**, providing hints and leading prompts to help users build problem-solving skills independently.
 
@@ -13,14 +13,14 @@ Unlike standard AI search tools that immediately output solutions, HintSpark act
 - 📰 **Mathematical Essays & Feed**: Substack-style article grid with dynamic category navigation (*Number Theory*, *Calculus*, *Algebra*, *Geometry*) and live search.
 - ✍️ **Article Publishing**: Publish community mathematical stories with automatic read-time estimation based on content and LaTeX complexity.
 - 🌙 **Dark & Light Mode**: Instant theme switching with tailored contrast palettes.
-- 🧩 **Modular Architecture**: Clean, component-based Jinja template structure and RESTful Flask backend endpoints.
+- 📱 **Desktop & PWA App Modes**: Run as a native OS desktop application (`desktop_app.py`) or install directly on mobile/desktop via Progressive Web App (PWA).
 
 ---
 
 ## Tech Stack
 
-- **Backend**: Python 3.8+, Flask, `google-generativeai`, `python-dotenv`
-- **Frontend**: HTML5, CSS3 (Vanilla design tokens & CSS variables), Modern JavaScript (ES6+)
+- **Backend**: Python 3.8+, Flask, `google-generativeai`, `python-dotenv`, `pywebview`
+- **Frontend**: HTML5, CSS3 (Vanilla design tokens & CSS variables), Modern JavaScript (ES6+), `marked.js`
 - **Math Rendering**: KaTeX (CDN auto-render)
 - **AI Model**: Google Gemini API (`gemini-1.5-flash`, `gemini-2.0-flash`, `gemini-1.5-pro`)
 
@@ -88,16 +88,35 @@ pip install -r requirements.txt
 
 ### Step 5: Run the Application
 
-Start the Flask development server:
-
+#### Option A: Web Mode (Flask Server)
 ```bash
 python app.py
 ```
+Open your browser and navigate to `http://127.0.0.1:5000`.
 
-Open your browser and navigate to:
+#### Option B: Native Desktop App Mode
+```bash
+python desktop_app.py
 ```
-http://127.0.0.1:5000
+Launches HintSpark inside a standalone desktop window (Windows, macOS, Linux).
+
+---
+
+## 📱 App Conversion Guide (Building Desktop Executables & PWA)
+
+### 1. Build Standalone Desktop Executable (`.exe` / `.app`)
+To compile HintSpark into a standalone executable installer that runs without opening a web browser:
+
+```bash
+pip install pyinstaller pywebview
+pyinstaller --noconfirm --onedir --windowed --name "HintSpark" desktop_app.py
 ```
+The compiled application output will be generated inside the `dist/HintSpark/` directory.
+
+### 2. Progressive Web App (PWA) Installation
+When hosted on any web server:
+- **Desktop (Chrome/Edge)**: Click the **"Install App"** icon in the URL address bar.
+- **Mobile (iOS / Android)**: Tap **"Add to Home Screen"** in Safari or Chrome to install HintSpark as a native mobile home screen app.
 
 ---
 
@@ -108,18 +127,20 @@ math-helper/
 ├── .env.example              # Sample environment variable template
 ├── .gitignore                # Git ignore configuration (ignores .env, venvs, cache)
 ├── app.py                    # Flask application entry point & REST API routes
+├── desktop_app.py            # Native OS Desktop application launcher (pywebview)
 ├── list_models.py            # Utility script to query available Gemini models
-├── test_api.py               # Utility script to test Gemini API connection
-├── requirements.txt          # Python package dependencies
+├── requirements.txt          # Python package dependencies (Flask, pywebview, etc.)
 ├── data/
 │   └── blogs.json            # Local JSON storage for articles & stories
 ├── static/
 │   ├── css/
 │   │   └── style.css         # Main stylesheet (Design tokens, layouts, responsive design)
-│   └── js/
-│       └── app.js            # Client-side logic (Fetch API, KaTeX renderer, Tutor drawer)
+│   ├── js/
+│   │   └── app.js            # Client-side logic (Fetch API, KaTeX renderer, Tutor drawer)
+│   ├── manifest.json         # PWA Progressive Web App configuration manifest
+│   └── sw.js                 # PWA Service Worker for offline shell caching
 └── templates/
-    ├── index.html            # Main parent layout template
+    ├── index.html            # Main parent layout template (includes PWA meta tags)
     └── components/           # Modular Jinja template partials
         ├── sidebar.html      # Sidebar navigation & theme toggle
         ├── header.html       # Workspace header & search input
