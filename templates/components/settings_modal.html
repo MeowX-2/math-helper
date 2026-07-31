@@ -5,15 +5,18 @@
         <button style="position: absolute; top: 1.2rem; right: 1.5rem; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--text-muted);" onclick="closeSettingsModal()" title="Close Settings">✕</button>
         <h2 class="modal-title">🔑 Google Gemini API Setup</h2>
         <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1.25rem; line-height: 1.5;">
-            To use the <strong>AI Math Assistant</strong>, please enter your Google Gemini API key below. This will automatically create your local <code>.env</code> file on disk for your project.
+            To use the <strong>AI Math Assistant</strong>, enter your Google Gemini API key below. This will automatically generate a clean <code>.env</code> file for your project.
         </p>
 
         <form onsubmit="handleSaveApiKey(event)">
             <div class="form-group">
                 <label for="custom-api-key">Gemini API Key</label>
                 <input type="password" id="custom-api-key" placeholder="AIzaSy..." autocomplete="off" required>
+                <p style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.4rem;">
+                    💡 <em>Tip: Paste your key raw without quote marks (quotes <code>"..."</code> are cleaned automatically).</em>
+                </p>
                 <div style="margin-top: 0.5rem; font-size: 0.8rem; color: var(--text-muted); display: flex; justify-content: space-between; align-items: center;">
-                    <span>Don't have a key?</span>
+                    <span>Need an API key?</span>
                     <a href="https://aistudio.google.com/" target="_blank" rel="noopener" style="color: var(--accent-primary); font-weight: 600; text-decoration: none;">Get Free Key at Google AI Studio ↗</a>
                 </div>
             </div>
