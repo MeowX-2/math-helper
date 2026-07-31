@@ -118,8 +118,8 @@ function renderArticles(blogs) {
         heroSection.style.display = 'none';
         gridSection.innerHTML = `
             <div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 4rem 1rem;">
-                <p style="font-family: var(--font-title); font-size: 1.5rem; margin-bottom: 0.5rem;">No stories found.</p>
-                <p style="font-size: 0.9rem;">Click "+ Publish Story" in the sidebar to contribute!</p>
+                <p style="font-family: var(--font-display); font-size: 1.5rem; margin-bottom: 0.5rem;">No articles found.</p>
+                <p style="font-size: 0.9rem;">Click "+ New Article" in the sidebar to contribute!</p>
             </div>
         `;
         return;
