@@ -419,18 +419,19 @@ function closeSettingsModal() {
  */
 async function handleSaveApiKey(e) {
     e.preventDefault();
-    const key = document.getElementById('custom-api-key').value.trim();
-    if (!key) return;
+    const rawKey = document.getElementById('custom-api-key').value.trim();
+    const cleanKey = rawKey.replace(/^["']|["']$/g, '').trim();
+    if (!cleanKey) return;
 
     try {
-        // Save key in localStorage for browser state
-        localStorage.setItem('user_gemini_api_key', key);
+        // Save clean key in localStorage for browser state
+        localStorage.setItem('user_gemini_api_key', cleanKey);
 
         // Call backend API to write .env file to project root on disk
         const res = await fetch('/api/save_env', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ api_key: key })
+            body: JSON.stringify({ api_key: cleanKey })
         });
         const data = await res.json();
 

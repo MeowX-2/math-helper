@@ -105,15 +105,16 @@ def save_env():
     """
     POST /api/save_env
     Save user-provided Gemini API key to local .env file on disk and initialize Gemini AI.
-    Automatically strips quotes ("...") and whitespace.
+    Normalizes quote handling so whether input is 'a' or '"a"', it is stored as GEMINI_API_KEY="a".
     """
     try:
         data = request.json or {}
-        raw_key = data.get('api_key', '').strip()
-        # Clean leading/trailing single or double quotes
-        key = raw_key.strip('"').strip("'").strip()
+        raw_key = (data.get('api_key', '') or '').strip()
+        
+        # Clean all surrounding single and double quotes
+        clean_key = raw_key.strip('"').strip("'").strip()
 
-        if not key:
+        if not clean_key:
             return jsonify({
                 'status': 'error',
                 'message': 'API Key cannot be empty.'
@@ -122,15 +123,15 @@ def save_env():
         # Path to .env file in project root
         env_path = os.path.join(os.path.dirname(__file__), '.env')
         
-        # Write clean .env file on disk
+        # Always store in clean format GEMINI_API_KEY="clean_key"
         with open(env_path, 'w', encoding='utf-8') as f:
-            f.write(f'# HintSpark Environment Configuration\nGEMINI_API_KEY={key}\n')
+            f.write(f'# HintSpark Environment Configuration\nGEMINI_API_KEY="{clean_key}"\n')
 
         # Reload environment variables
         load_dotenv(env_path=env_path, override=True)
         
         # Reconfigure genai library with clean key
-        genai.configure(api_key=key)
+        genai.configure(api_key=clean_key)
 
         return jsonify({
             'status': 'success',
