@@ -197,13 +197,26 @@ def get_tutor_hint(user_input, client_key_header=''):
         print(f"Note: .env auto-reload check: {err}")
 
     client_key = (client_key_header or '').strip().strip('"').strip("'")
-    env_key = (os.getenv("GEMINI_API_KEY") or os.getenv("CLAUDE_API_KEY") or os.getenv("API") or '').strip().strip('"').strip("'")
+    claude_key = (os.getenv("CLAUDE_API_KEY") or '').strip().strip('"').strip("'")
+    gemini_key = (os.getenv("GEMINI_API_KEY") or os.getenv("API") or '').strip().strip('"').strip("'")
 
     keys_to_try = []
+
+    # 1. If client header key is explicitly provided
     if client_key:
         keys_to_try.append(('client_header', client_key))
-    if env_key and env_key != client_key:
-        keys_to_try.append(('env_file', env_key))
+
+    # 2. Add Claude key from .env if present
+    if claude_key and not any(k == claude_key for _, k in keys_to_try):
+        # If client header was a rate-limited Gemini key, prioritize Claude key first!
+        if client_key and not (client_key.startswith('sk-ant-') or client_key.startswith('sk-')):
+            keys_to_try.insert(0, ('env_claude', claude_key))
+        else:
+            keys_to_try.append(('env_claude', claude_key))
+
+    # 3. Add Gemini key from .env if present
+    if gemini_key and not any(k == gemini_key for _, k in keys_to_try):
+        keys_to_try.append(('env_gemini', gemini_key))
 
     if not keys_to_try:
         raise Exception('API Key Required: Please enter your Google Gemini or Anthropic Claude API key in Settings (⚙️).')
