@@ -372,7 +372,8 @@ async function sendTutorMessage() {
             renderFormattedContent(aiMsg, data.response);
         } else {
             renderFormattedContent(aiMsg, `Error: ${data.message || 'Unable to generate hint.'}`);
-            if (data.message && data.message.includes('API Key Required')) {
+            if (data.message && (data.message.includes('API key not valid') || data.message.includes('API Key Required') || data.message.includes('API_KEY_INVALID'))) {
+                localStorage.removeItem('user_gemini_api_key');
                 openSettingsModal();
             }
         }
