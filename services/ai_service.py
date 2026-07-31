@@ -181,21 +181,43 @@ def get_tutor_hint(user_input, client_key_header=''):
     """
     Unified multi-provider AI hint generator.
     Routes to Anthropic Claude or Google Gemini based on key format.
+    Automatically reloads .env and falls back between client and server keys.
     """
     user_input = (user_input or '').strip()
     if not user_input:
         raise ValueError('Prompt cannot be empty.')
 
+    # Always reload .env so manual edits to .env are detected immediately without server restart
+    try:
+        from dotenv import load_dotenv
+        env_path = os.path.normpath(os.path.join(os.path.dirname(__file__), '..', '.env'))
+        if os.path.exists(env_path):
+            load_dotenv(dotenv_path=env_path, override=True)
+    except Exception as err:
+        print(f"Note: .env auto-reload check: {err}")
+
     client_key = (client_key_header or '').strip().strip('"').strip("'")
     env_key = (os.getenv("GEMINI_API_KEY") or os.getenv("CLAUDE_API_KEY") or os.getenv("API") or '').strip().strip('"').strip("'")
-    effective_api_key = client_key or env_key
 
-    if not effective_api_key:
+    keys_to_try = []
+    if client_key:
+        keys_to_try.append(('client_header', client_key))
+    if env_key and env_key != client_key:
+        keys_to_try.append(('env_file', env_key))
+
+    if not keys_to_try:
         raise Exception('API Key Required: Please enter your Google Gemini or Anthropic Claude API key in Settings (⚙️).')
 
-    if effective_api_key.startswith('sk-ant-') or effective_api_key.startswith('sk-'):
-        raw_response = generate_claude_hint(user_input, effective_api_key)
-    else:
-        raw_response = generate_gemini_hint(user_input, effective_api_key)
+    last_error = None
+    for source, key in keys_to_try:
+        try:
+            if key.startswith('sk-ant-') or key.startswith('sk-'):
+                raw_response = generate_claude_hint(user_input, key)
+            else:
+                raw_response = generate_gemini_hint(user_input, key)
+            return clean_ai_response(raw_response)
+        except Exception as e:
+            print(f"API Key attempt ({source}) failed: {e}")
+            last_error = e
 
-    return clean_ai_response(raw_response)
+    raise last_error
