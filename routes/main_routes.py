@@ -74,6 +74,13 @@ def save_env():
             f.writelines(env_lines)
 
         os.environ[env_var_name] = clean_key
+        
+        # Safely reload dotenv with dotenv_path parameter
+        try:
+            from dotenv import load_dotenv
+            load_dotenv(dotenv_path=env_path, override=True)
+        except Exception as err:
+            print(f"Dotenv reload note: {err}")
 
         return jsonify({
             'status': 'success',

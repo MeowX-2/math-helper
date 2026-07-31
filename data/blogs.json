@@ -1,5 +1,18 @@
 [
   {
+    "id": "1785516281836",
+    "title": "Testing this",
+    "subtitle": "medals",
+    "author": "Arifa Alam",
+    "category": "NumberTheory",
+    "tags": [
+      "NumberTheory"
+    ],
+    "date": "July 31, 2026",
+    "read_time": "1 min read",
+    "content": "$$ 2 + 3 = 5$$ mew moew"
+  },
+  {
     "id": "1",
     "title": "Welcome to HintSpark: Guided AI Tutoring & Mathematical Insights",
     "subtitle": "Discover how HintSpark combines interactive LaTeX rendering, mathematical essay publishing, and an AI-guided math tutor.",
@@ -14,6 +27,6 @@
     ],
     "date": "July 31, 2026",
     "read_time": "3 min read",
-    "content": "Welcome to **HintSpark** — a platform designed for exploring mathematical concepts through interactive essays, beautiful LaTeX rendering, and guided AI tutoring.\n\n### 1. Beautiful Math Notation\nMathematics requires clear, elegant notation. HintSpark renders inline formulas like Euler's identity $e^{i\\pi} + 1 = 0$ as well as multi-line display equations:\n\n$$\\int_{-\\infty}^{\\infty} e^{-x^2} \\, dx = \\sqrt{\\pi}$$\n\n### 2. Linear Algebra & Matrices\nVisualize vector space transformations with clean matrix notation:\n\n$$\\begin{bmatrix} a & b \\\\ c & d \\end{bmatrix} \\begin{bmatrix} x \\\\ y \\end{bmatrix} = \\begin{bmatrix} ax + by \\\\ cx + dy \\end{bmatrix}$$\n\n### 3. Guided AI Math Tutor\nHave a question about a problem or proof? Open the **AI Math Assistant** from the sidebar drawer! HintSpark acts as a personal tutor, guiding you with step-by-step hints and LaTeX annotations without revealing direct answers."
+    "content": "Welcome to **HintSpark** \u2014 a platform designed for exploring mathematical concepts through interactive essays, beautiful LaTeX rendering, and guided AI tutoring.\n\n### 1. Beautiful Math Notation\nMathematics requires clear, elegant notation. HintSpark renders inline formulas like Euler's identity $e^{i\\pi} + 1 = 0$ as well as multi-line display equations:\n\n$$\\int_{-\\infty}^{\\infty} e^{-x^2} \\, dx = \\sqrt{\\pi}$$\n\n### 2. Linear Algebra & Matrices\nVisualize vector space transformations with clean matrix notation:\n\n$$\\begin{bmatrix} a & b \\\\ c & d \\end{bmatrix} \\begin{bmatrix} x \\\\ y \\end{bmatrix} = \\begin{bmatrix} ax + by \\\\ cx + dy \\end{bmatrix}$$\n\n### 3. Guided AI Math Tutor\nHave a question about a problem or proof? Open the **AI Math Assistant** from the sidebar drawer! HintSpark acts as a personal tutor, guiding you with step-by-step hints and LaTeX annotations without revealing direct answers."
   }
 ]
