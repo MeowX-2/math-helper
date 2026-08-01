@@ -23,3 +23,8 @@ __pycache__/
 *.swp
 *.swo
 .DS_Store
+
+# Build artifacts
+build/
+dist/
+*.spec

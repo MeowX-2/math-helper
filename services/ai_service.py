@@ -139,11 +139,13 @@ def generate_gemini_hint(user_input, api_key):
     )
 
     candidate_models = [
-        'gemini-1.5-flash',
+        'gemini-flash-latest',
+        'gemini-3.6-flash',
+        'gemini-3.5-flash',
+        'gemini-2.0-flash-lite',
+        'gemini-flash-lite-latest',
         'gemini-2.0-flash',
-        'gemini-1.5-flash-8b',
-        'models/gemini-1.5-flash',
-        'models/gemini-2.0-flash'
+        'gemini-1.5-flash'
     ]
 
     response_text = None
@@ -172,8 +174,11 @@ def generate_gemini_hint(user_input, api_key):
         return response_text
     else:
         raw_err = str(last_error) if last_error else 'No available AI model could process the request.'
-        if '429' in raw_err or 'Quota' in raw_err or 'quota' in raw_err:
-            raise Exception("Gemini Free-Tier Rate Limit Reached (15 req/min). Please retry in ~25 seconds, or switch to a Claude API Key in Settings (⚙️).")
+        raw_err_lower = raw_err.lower()
+        if 'day' in raw_err_lower or 'rpd' in raw_err_lower or 'daily' in raw_err_lower:
+            raise Exception("Gemini Free-Tier Daily Quota Reached. Daily limits reset at 12:00 AM Pacific Time (PST/PDT). Please enter a new API Key in Settings (⚙️) to continue immediately.")
+        elif '429' in raw_err or 'quota' in raw_err_lower or 'resourceexhausted' in raw_err_lower:
+            raise Exception("Gemini API Quota/Rate Limit Reached. (Per-minute limit: 15 req/min, Daily free quota: resets at 12:00 AM Pacific Time). Retry in 30 seconds or update your API Key in Settings (⚙️).")
         raise Exception(f"AI Service Error: {raw_err}")
 
 

@@ -12,9 +12,19 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
+import sys
+
+def get_base_dir():
+    if getattr(sys, 'frozen', False):
+        return sys._MEIPASS
+    return os.path.dirname(os.path.abspath(__file__))
+
 def create_app():
     """Application factory for modular Flask application setup."""
-    app = Flask(__name__)
+    base_dir = get_base_dir()
+    template_folder = os.path.join(base_dir, 'templates')
+    static_folder = os.path.join(base_dir, 'static')
+    app = Flask(__name__, template_folder=template_folder, static_folder=static_folder)
 
     # Register Route Blueprints
     from routes.main_routes import main_bp

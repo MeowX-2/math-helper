@@ -128,35 +128,36 @@ Launches HintSpark inside a standalone desktop window (Windows, macOS, Linux).
 
 ---
 
-## 📱 Mobile App & Android APK Creation Guide
+## 🖥️ Desktop Application (.exe) & Easy Local Execution
 
-### 1. Instant Android Installation (Zero Setup PWA)
-HintSpark comes with pre-configured Progressive Web App (PWA) files (`manifest.json` + `sw.js`).
-
-1. Open your live deployed URL on **Chrome for Android** (or Safari on iOS).
-2. Tap the Chrome menu **(⋮)** in the top right.
-3. Tap **"Install app"** or **"Add to Home screen"**.
-
-🎉 An official **HintSpark app icon** is added to your Android home screen, opening full-screen like a native mobile app!
+### Option 1: Instant 1-Click Launch (Python Desktop Window)
+Run HintSpark inside a native desktop application window:
+```bash
+python desktop_app.py
+```
+*This starts the backend and opens HintSpark directly inside a sleek native desktop window!*
 
 ---
 
-### 2. Build Standalone Android APK (`.apk`)
-To package HintSpark into an actual `.apk` file using Google's official **Bubblewrap CLI**:
+### Option 2: Download or Build Standalone Executable (`HintSpark.exe`)
+The easiest way to get HintSpark on Windows is to download the compiled `.exe` from our Releases page:
+[Download HintSpark.exe](https://github.com/MeowX-2/math-helper/releases)
 
-1. Install Bubblewrap CLI:
+If you prefer to build it yourself from source:
+
+1. Install PyInstaller & PyWebView (if not already installed):
    ```bash
-   npm install -g @bubblewrap/cli
+   pip install pyinstaller pywebview
    ```
-2. Initialize project from your live app manifest:
+2. Run the automated build script:
    ```bash
-   bubblewrap init --manifest=https://your-deployed-app.onrender.com/static/manifest.json
+   python build_exe.py
    ```
-3. Build the signed Android `.apk`:
-   ```bash
-   bubblewrap build
+3. Your executable will be generated at:
+   ```text
+   dist/HintSpark/HintSpark.exe
    ```
-This generates `app-release-signed.apk`, which you can copy to any Android device and tap to install!
+   *You can double-click `HintSpark.exe` to run the application offline, or zip the `dist/HintSpark` folder to share with anyone!*
 
 ---
 
