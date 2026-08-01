@@ -2,8 +2,8 @@
 HintSpark Setup Wizard & Uninstaller
 ====================================
 Interactive Windows Installer GUI for HintSpark Math Helper.
-Handles installation, Start Menu / Desktop shortcut creation, 
-Windows Registry uninstaller registration, and clean uninstallation.
+Handles threaded installation, file extraction, Start Menu & Desktop 
+shortcuts, Windows Registry uninstaller registration, and error logging.
 """
 
 import os
@@ -12,6 +12,8 @@ import shutil
 import zipfile
 import subprocess
 import winreg
+import threading
+import traceback
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
 
@@ -19,6 +21,15 @@ APP_NAME = "HintSpark"
 APP_TITLE = "HintSpark — AI Math Tutor & Helper"
 PUBLISHER = "MeowX Math Helper Team"
 VERSION = "1.0.0"
+
+LOG_FILE = os.path.join(os.environ.get('TEMP', 'C:\\Temp'), 'hintspark_setup.log')
+
+def log(msg):
+    try:
+        with open(LOG_FILE, 'a', encoding='utf-8') as f:
+            f.write(f"{msg}\n")
+    except Exception:
+        pass
 
 def get_base_dir():
     if getattr(sys, 'frozen', False):
@@ -48,13 +59,15 @@ def create_windows_shortcut(target_exe, shortcut_path, description=APP_TITLE):
         $Shortcut.Description = "{description}"
         $Shortcut.Save()
         """
-        subprocess.run(
+        res = subprocess.run(
             ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", ps_script],
             capture_output=True,
+            text=True,
             creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0
         )
+        log(f"Shortcut created at {shortcut_path}, exit code: {res.returncode}")
     except Exception as e:
-        print(f"Error creating shortcut {shortcut_path}: {e}")
+        log(f"Error creating shortcut {shortcut_path}: {e}")
 
 def register_uninstaller(install_dir, main_exe):
     try:
@@ -69,8 +82,9 @@ def register_uninstaller(install_dir, main_exe):
             winreg.SetValueEx(key, "DisplayIcon", 0, winreg.REG_SZ, main_exe)
             winreg.SetValueEx(key, "NoModify", 0, winreg.REG_DWORD, 1)
             winreg.SetValueEx(key, "NoRepair", 0, winreg.REG_DWORD, 1)
+        log("Registered uninstaller in Windows Registry.")
     except Exception as e:
-        print(f"Error registering uninstaller: {e}")
+        log(f"Error registering uninstaller: {e}")
 
 def unregister_uninstaller():
     try:
@@ -97,7 +111,7 @@ def perform_uninstallation():
     # 3. Unregister from Windows Registry
     unregister_uninstaller()
 
-    # 4. Remove installation folder via script (since executable is running inside install_dir)
+    # 4. Remove installation folder asynchronously via CMD batch
     cmd = f'timeout /t 2 /nobreak > NUL & rmdir /s /q "{install_dir}"'
     subprocess.Popen(cmd, shell=True, creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0)
 
@@ -105,10 +119,9 @@ class InstallerGUI:
     def __init__(self, root):
         self.root = root
         self.root.title(f"{APP_NAME} Setup Wizard")
-        self.root.geometry("540x360")
+        self.root.geometry("540x370")
         self.root.resizable(False, False)
         
-        # Windows dark/light palette matching style
         self.install_dir_var = tk.StringVar(value=get_default_install_dir())
         self.create_desktop_shortcut_var = tk.BooleanVar(value=True)
         self.create_start_menu_var = tk.BooleanVar(value=True)
@@ -128,14 +141,14 @@ class InstallerGUI:
         lbl_sub.pack(anchor="w", padx=20)
 
         # Body container
-        self.body = tk.Frame(self.root, padx=25, pady=20)
+        self.body = tk.Frame(self.root, padx=25, pady=15)
         self.body.pack(fill="both", expand=True)
 
         lbl_dest = tk.Label(self.body, text="Installation Folder:", font=("Segoe UI", 10, "bold"))
         lbl_dest.pack(anchor="w", pady=(0, 5))
 
         path_frame = tk.Frame(self.body)
-        path_frame.pack(fill="x", pady=(0, 15))
+        path_frame.pack(fill="x", pady=(0, 10))
 
         ent_path = ttk.Entry(path_frame, textvariable=self.install_dir_var, font=("Segoe UI", 9))
         ent_path.pack(side="left", fill="x", expand=True, padx=(0, 10))
@@ -145,17 +158,17 @@ class InstallerGUI:
 
         # Checkboxes
         chk_desktop = ttk.Checkbutton(self.body, text="Create a Desktop Shortcut", variable=self.create_desktop_shortcut_var)
-        chk_desktop.pack(anchor="w", pady=4)
+        chk_desktop.pack(anchor="w", pady=3)
 
         chk_start = ttk.Checkbutton(self.body, text="Create a Start Menu Shortcut (Searchable in Windows)", variable=self.create_start_menu_var)
-        chk_start.pack(anchor="w", pady=4)
+        chk_start.pack(anchor="w", pady=3)
 
         chk_launch = ttk.Checkbutton(self.body, text="Launch HintSpark after installation completes", variable=self.launch_after_var)
-        chk_launch.pack(anchor="w", pady=4)
+        chk_launch.pack(anchor="w", pady=3)
 
         # Progress bar
         self.progress = ttk.Progressbar(self.body, mode="determinate")
-        self.progress.pack(fill="x", pady=(20, 5))
+        self.progress.pack(fill="x", pady=(15, 5))
         
         self.lbl_status = tk.Label(self.body, text="Ready to install.", font=("Segoe UI", 9), fg="#64748b")
         self.lbl_status.pack(anchor="w")
@@ -167,7 +180,7 @@ class InstallerGUI:
         self.btn_cancel = ttk.Button(footer, text="Cancel", command=self.root.quit)
         self.btn_cancel.pack(side="right", padx=(5, 20), pady=10)
 
-        self.btn_install = ttk.Button(footer, text="Install", command=self.start_install)
+        self.btn_install = ttk.Button(footer, text="Install", command=self.start_install_thread)
         self.btn_install.pack(side="right", padx=5, pady=10)
 
     def browse_folder(self):
@@ -175,47 +188,66 @@ class InstallerGUI:
         if folder:
             self.install_dir_var.set(os.path.join(folder, APP_NAME))
 
-    def start_install(self):
+    def start_install_thread(self):
         self.btn_install.config(state="disabled")
         self.btn_cancel.config(state="disabled")
-        self.lbl_status.config(text="Extracting program files...")
-        self.progress["value"] = 20
-        self.root.update()
-        
+        threading.Thread(target=self.do_install, daemon=True).start()
+
+    def update_status(self, text, progress_val):
+        def _update():
+            self.lbl_status.config(text=text)
+            self.progress["value"] = progress_val
+        self.root.after(0, _update)
+
+    def do_install(self):
         try:
+            log("Starting HintSpark installation process...")
             target_dir = self.install_dir_var.get()
             os.makedirs(target_dir, exist_ok=True)
             
             base_dir = get_base_dir()
+            log(f"Base dir: {base_dir}")
             payload_zip = os.path.join(base_dir, "payload.zip")
             payload_dir = os.path.join(base_dir, "payload")
             
-            # Extract files
+            # 1. Extract files with progress updates
             if os.path.exists(payload_zip):
+                log(f"Extracting payload.zip ({os.path.getsize(payload_zip)} bytes)...")
                 with zipfile.ZipFile(payload_zip, 'r') as zip_ref:
-                    zip_ref.extractall(target_dir)
+                    file_list = zip_ref.namelist()
+                    total_files = len(file_list)
+                    for idx, member in enumerate(file_list):
+                        zip_ref.extract(member, target_dir)
+                        if idx % 20 == 0 or idx == total_files - 1:
+                            pct = int((idx / total_files) * 80)
+                            self.update_status(f"Extracting files ({idx}/{total_files})...", pct)
             elif os.path.exists(payload_dir):
+                log("Copying payload directory...")
                 shutil.copytree(payload_dir, target_dir, dirs_exist_ok=True)
+                self.update_status("Extracted program files...", 80)
             else:
-                # If running directly from source directory for testing
                 dist_src = os.path.join(base_dir, "dist", APP_NAME)
                 if os.path.exists(dist_src):
+                    log("Copying local dist/HintSpark directory...")
                     shutil.copytree(dist_src, target_dir, dirs_exist_ok=True)
+                    self.update_status("Extracted program files...", 80)
                 else:
-                    raise Exception("Installer payload missing. Please run build_exe.py to package setup.")
+                    raise Exception(f"Installer payload missing at {payload_zip}")
 
-            self.progress["value"] = 60
-            self.lbl_status.config(text="Creating shortcuts & registering app...")
-            self.root.update()
-
+            # 2. Shortcuts & Uninstaller
+            self.update_status("Creating shortcuts...", 85)
             main_exe = os.path.join(target_dir, f"{APP_NAME}.exe")
+            log(f"Target main exe: {main_exe}")
             
-            # Copy self as uninstaller
+            # Copy installer as uninstaller
             self_exe = sys.executable if getattr(sys, 'frozen', False) else None
             if self_exe and os.path.exists(self_exe):
                 uninstaller_exe = os.path.join(target_dir, "Uninstall_HintSpark.exe")
-                try: shutil.copy2(self_exe, uninstaller_exe)
-                except Exception: pass
+                try:
+                    shutil.copy2(self_exe, uninstaller_exe)
+                    log(f"Copied uninstaller to {uninstaller_exe}")
+                except Exception as e:
+                    log(f"Failed to copy uninstaller: {e}")
 
             # Create Start Menu Shortcut
             if self.create_start_menu_var.get():
@@ -232,22 +264,28 @@ class InstallerGUI:
             # Register in Windows Add/Remove Programs
             register_uninstaller(target_dir, main_exe)
 
-            self.progress["value"] = 100
-            self.lbl_status.config(text="Installation successful!")
-            self.root.update()
+            self.update_status("Installation complete!", 100)
+            log("Installation finished successfully.")
 
-            messagebox.showinfo("Success", f"{APP_NAME} has been successfully installed on your computer!")
-            
-            if self.launch_after_var.get() and os.path.exists(main_exe):
-                subprocess.Popen([main_exe], cwd=target_dir)
+            def _finish():
+                messagebox.showinfo("Success", f"{APP_NAME} has been successfully installed on your computer!")
+                if self.launch_after_var.get() and os.path.exists(main_exe):
+                    subprocess.Popen([main_exe], cwd=target_dir)
+                self.root.destroy()
 
-            self.root.destroy()
+            self.root.after(0, _finish)
 
         except Exception as e:
-            messagebox.showerror("Installation Error", f"Failed to install {APP_NAME}:\n{str(e)}")
-            self.btn_install.config(state="normal")
-            self.btn_cancel.config(state="normal")
-            self.lbl_status.config(text="Installation failed.")
+            err_msg = traceback.format_exc()
+            log(f"Installation ERROR:\n{err_msg}")
+            
+            def _error():
+                messagebox.showerror("Installation Error", f"Failed to install {APP_NAME}:\n{str(e)}\n\nLog saved to:\n{LOG_FILE}")
+                self.btn_install.config(state="normal")
+                self.btn_cancel.config(state="normal")
+                self.lbl_status.config(text="Installation failed.")
+
+            self.root.after(0, _error)
 
 def run_uninstall_gui():
     root = tk.Tk()
