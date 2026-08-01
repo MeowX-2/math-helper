@@ -149,6 +149,36 @@ The recommended way to install HintSpark on Windows is using the **Setup Install
    - Creates a **Desktop Shortcut**.
    - Registers an entry in **Windows Settings / Control Panel (Add or Remove Programs)** for clean uninstallation.
 
+### Option 3: Linux Desktop App (`HintSpark-Linux`)
+
+#### Method A: Run via Launch Script
+1. Clone the repo and navigate to the project directory:
+   ```bash
+   git clone https://github.com/MeowX-2/math-helper.git
+   cd math-helper
+   ```
+2. Make `launch_linux.sh` executable and run it:
+   ```bash
+   chmod +x launch_linux.sh
+   ./launch_linux.sh
+   ```
+   *(The script automatically creates a virtualenv, installs WebKit/PyWebView dependencies, and launches HintSpark).*
+
+#### Method B: Build Standalone Linux Executable Tarball
+1. Install system WebKit GTK dependencies (Debian/Ubuntu):
+   ```bash
+   sudo apt update
+   sudo apt install -y python3-gi gir1.2-webkit2-4.0
+   ```
+2. Build with PyInstaller:
+   ```bash
+   pip install pyinstaller pywebview -r requirements.txt
+   pyinstaller --noconfirm --onedir --windowed --name HintSpark --add-data "templates:templates" --add-data "static:static" --add-data "data:data" desktop_app.py
+   ```
+3. Run the compiled Linux app from `dist/HintSpark/HintSpark`.
+
+---
+
 If you prefer to build the setup installer from source:
 
 1. Install PyInstaller & PyWebView (if not already installed):

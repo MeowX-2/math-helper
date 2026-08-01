@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=HintSpark
+Comment=AI Math Tutor & Helper
+Exec=bash -c "cd %k && ./launch_linux.sh"
+Terminal=false
+Type=Application
+Categories=Education;Science;Math;
+Keywords=Math;Helper;Tutor;AI;Gemini;
