@@ -139,11 +139,17 @@ python desktop_app.py
 
 ---
 
-### Option 2: Download or Build Standalone Executable (`HintSpark.exe`)
-The easiest way to get HintSpark on Windows is to download the compiled `.exe` from our Releases page:
-[Download HintSpark.exe](https://github.com/MeowX-2/math-helper/releases)
+### Option 2: Download or Build Windows Setup Installer (`HintSpark_Setup.exe`)
+The recommended way to install HintSpark on Windows is using the **Setup Installer Wizard**:
+1. Download **`HintSpark_Setup.exe`** from our [Releases Page](https://github.com/MeowX-2/math-helper/releases).
+2. Double-click **`HintSpark_Setup.exe`** and click **Install**.
+3. The setup wizard automatically:
+   - Installs HintSpark to `%LOCALAPPDATA%\Programs\HintSpark`.
+   - Creates a **Start Menu Shortcut** (so searching "HintSpark" in Windows search immediately opens it).
+   - Creates a **Desktop Shortcut**.
+   - Registers an entry in **Windows Settings / Control Panel (Add or Remove Programs)** for clean uninstallation.
 
-If you prefer to build it yourself from source:
+If you prefer to build the setup installer from source:
 
 1. Install PyInstaller & PyWebView (if not already installed):
    ```bash
