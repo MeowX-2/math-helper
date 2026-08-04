@@ -6,13 +6,16 @@
             <span class="tutor-status-dot"></span>
             <span>HintSpark AI Assistant</span>
         </div>
-        <button onclick="toggleTutorDrawer()" class="tutor-close-btn" title="Close AI Assistant">✕</button>
+        <div class="tutor-header-actions">
+            <button onclick="resetTutorChat()" class="tutor-header-btn" title="Start New Conversation">🔄 New Chat</button>
+            <button onclick="toggleTutorDrawer()" class="tutor-close-btn" title="Close AI Assistant">✕</button>
+        </div>
     </div>
 
     <!-- Message Stream Container -->
     <div class="tutor-messages" id="tutor-messages">
         <div class="tutor-msg tutor-ai-msg">
-            Hello! I am your AI math tutor. Ask me any equation, proof concept, or math problem prompt!
+            Hello! I am your Socratic AI math tutor. Ask me any equation or problem concept — I will guide you with targeted questions and hints without giving away the final solution!
         </div>
     </div>
 
@@ -25,7 +28,7 @@
 
     <!-- Chat Input Form -->
     <div class="tutor-input-bar">
-        <input type="text" id="tutor-input" placeholder="Ask a math problem (e.g., $x^2 - 4 = 0$)..." onkeypress="if(event.key==='Enter') sendTutorMessage()">
+        <textarea id="tutor-input" rows="1" placeholder="Ask a math problem (e.g. $x^2 - 4 = 0$)... Press Enter to send, Shift+Enter for new line" onkeydown="handleTutorInputKeyDown(event)"></textarea>
         <button id="tutor-send-btn" onclick="sendTutorMessage()">Ask</button>
     </div>
 </div>

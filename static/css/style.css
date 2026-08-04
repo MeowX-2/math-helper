@@ -571,6 +571,106 @@ body {
     margin-bottom: 0.6rem;
 }
 
+/* Tag Chips & Filters Styling */
+.tag-filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin: 1.5rem 0 1rem 0;
+    padding: 0.75rem 1rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+}
+
+.tag-chip-btn {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    font-family: var(--font-sans);
+    font-size: 0.82rem;
+    font-weight: 500;
+    padding: 0.35rem 0.75rem;
+    border-radius: 9999px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.tag-chip-btn:hover {
+    color: var(--accent-primary);
+    border-color: var(--accent-primary);
+    background: var(--accent-subtle, rgba(79, 70, 229, 0.08));
+}
+
+.tag-chip-btn.active {
+    background: var(--accent-primary);
+    color: white;
+    border-color: var(--accent-primary);
+    font-weight: 600;
+    box-shadow: var(--shadow-sm);
+}
+
+.sidebar-tag-cloud {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    padding: 0.5rem 0.25rem 1.25rem 0.25rem;
+}
+
+.sidebar-tag-badge {
+    font-family: var(--font-mono);
+    font-size: 0.73rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    padding: 0.2rem 0.55rem;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.sidebar-tag-badge:hover, .sidebar-tag-badge.active {
+    color: var(--accent-primary);
+    border-color: var(--accent-primary);
+    background: rgba(79, 70, 229, 0.1);
+}
+
+.card-tags-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-bottom: 0.65rem;
+}
+
+.card-tag-pill, .hero-tag-pill, .reader-tag-pill {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--accent-primary);
+    background: rgba(79, 70, 229, 0.08);
+    border: 1px solid rgba(79, 70, 229, 0.2);
+    padding: 0.18rem 0.5rem;
+    border-radius: 9999px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.card-tag-pill:hover, .hero-tag-pill:hover, .reader-tag-pill:hover {
+    background: var(--accent-primary);
+    color: white;
+    border-color: var(--accent-primary);
+}
+
+.hero-tags-list {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+}
+
 .article-card-title {
     font-family: var(--font-display);
     font-size: 1.35rem;
@@ -648,6 +748,32 @@ body {
     box-shadow: 0 0 8px #4ade80;
 }
 
+.tutor-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.tutor-header-btn {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: white;
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 0.25rem 0.6rem;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.tutor-header-btn:hover {
+    background: rgba(255, 255, 255, 0.28);
+    transform: translateY(-1px);
+}
+
 .tutor-close-btn {
     background: none;
     border: none;
@@ -656,6 +782,9 @@ body {
     cursor: pointer;
     opacity: 0.8;
     transition: opacity 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .tutor-close-btn:hover {
@@ -697,52 +826,48 @@ body {
     color: var(--text-primary);
     align-self: flex-start;
     border-bottom-left-radius: 2px;
+    position: relative;
+    padding-top: 1.8rem;
 }
 
-/* Markdown formatting inside AI tutor messages */
-.tutor-ai-msg p {
-    margin: 0 0 0.5rem 0;
-}
-.tutor-ai-msg p:last-child {
-    margin-bottom: 0;
-}
-.tutor-ai-msg ul, .tutor-ai-msg ol {
-    margin: 0.4rem 0 0.6rem 1.2rem;
-    padding: 0;
-}
-.tutor-ai-msg li {
-    margin-bottom: 0.25rem;
-}
-.tutor-ai-msg h1, .tutor-ai-msg h2, .tutor-ai-msg h3, .tutor-ai-msg h4 {
-    font-family: var(--font-display);
-    font-size: 1rem;
-    font-weight: 700;
-    margin: 0.6rem 0 0.3rem 0;
-    color: var(--text-primary);
-}
-.tutor-ai-msg code {
+.tutor-copy-btn {
+    position: absolute;
+    top: 0.4rem;
+    right: 0.5rem;
     background: var(--bg-body);
     border: 1px solid var(--border-color);
-    padding: 0.15rem 0.4rem;
-    border-radius: 4px;
-    font-family: var(--font-mono);
-    font-size: 0.85em;
-}
-.tutor-ai-msg pre {
-    background: var(--bg-body);
-    border: 1px solid var(--border-color);
-    padding: 0.65rem;
-    border-radius: 6px;
-    overflow-x: auto;
-    margin: 0.5rem 0;
-}
-.tutor-ai-msg pre code {
-    background: none;
-    border: none;
-    padding: 0;
-}
-.tutor-ai-msg strong {
+    color: var(--text-muted);
+    font-size: 0.7rem;
     font-weight: 600;
+    padding: 0.15rem 0.45rem;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.tutor-copy-btn:hover {
+    color: var(--accent-primary);
+    border-color: var(--accent-primary);
+    background: var(--bg-surface);
+}
+
+.btn-delete-article {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #ef4444;
+    font-family: var(--font-sans);
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.3rem 0.75rem;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-delete-article:hover {
+    background: #ef4444;
+    color: white;
+    border-color: #ef4444;
 }
 
 /* Quick Suggest Chips Bar */
@@ -781,9 +906,10 @@ body {
     border-top: 1px solid var(--border-color);
     background: var(--bg-surface);
     gap: 0.5rem;
+    align-items: flex-end;
 }
 
-.tutor-input-bar input {
+.tutor-input-bar textarea {
     flex: 1;
     background: var(--bg-body);
     border: 1px solid var(--border-color);
@@ -793,9 +919,12 @@ body {
     font-size: 0.88rem;
     color: var(--text-primary);
     outline: none;
+    resize: none;
+    max-height: 120px;
+    line-height: 1.4;
 }
 
-.tutor-input-bar input:focus {
+.tutor-input-bar textarea:focus {
     border-color: var(--accent-primary);
 }
 

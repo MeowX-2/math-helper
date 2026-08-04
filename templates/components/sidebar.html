@@ -9,15 +9,18 @@
         </div>
     </a>
 
-    <!-- Main Category Navigation Links -->
-    <div class="nav-section-title">Explore Topics</div>
+    <!-- Main Navigation Links -->
+    <div class="nav-section-title">Navigation</div>
     <ul class="nav-list">
-        <li><a class="nav-item active" onclick="selectTopic('All', this)"><span class="icon">📰</span> Feed & Articles</a></li>
-        <li><a class="nav-item" onclick="selectTopic('NumberTheory', this)"><span class="icon">🔢</span> Number Theory</a></li>
-        <li><a class="nav-item" onclick="selectTopic('Calculus', this)"><span class="icon">♾️</span> Calculus</a></li>
-        <li><a class="nav-item" onclick="selectTopic('Algebra', this)"><span class="icon">📊</span> Algebra</a></li>
-        <li><a class="nav-item" onclick="selectTopic('Geometry', this)"><span class="icon">📐</span> Geometry</a></li>
+        <li><a class="nav-item active" id="nav-item-all" onclick="selectTopic('All', this)"><span class="icon">📰</span> Feed & Articles</a></li>
+        <li><a class="nav-item" id="nav-item-guide" onclick="openUserGuide(this)"><span class="icon">📖</span> User Guide & Manual</a></li>
     </ul>
+
+    <!-- Dynamic Tag Cloud Navigation -->
+    <div class="nav-section-title">Topic Tags</div>
+    <div class="sidebar-tag-cloud" id="sidebar-tag-cloud">
+        <!-- Dynamically populated tags from app.js -->
+    </div>
 
     <!-- Quick Feature Shortcuts -->
     <div class="nav-section-title">Interactive Tools</div>

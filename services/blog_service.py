@@ -31,12 +31,36 @@ def load_blogs():
 
 def save_blogs(blogs):
     """
-    Save list of blog objects into local JSON storage file.
-    Automatically creates the parent directory if missing.
+    Save list of blog objects into local JSON storage file using atomic file replacement.
+    Prevents file corruption on unexpected interruptions or concurrent writes.
     """
     os.makedirs(os.path.dirname(DATA_FILE), exist_ok=True)
-    with open(DATA_FILE, 'w', encoding='utf-8') as f:
-        json.dump(blogs, f, indent=2)
+    temp_file = DATA_FILE + '.tmp'
+    try:
+        with open(temp_file, 'w', encoding='utf-8') as f:
+            json.dump(blogs, f, indent=2, ensure_ascii=False)
+        os.replace(temp_file, DATA_FILE)
+    except Exception as e:
+        if os.path.exists(temp_file):
+            try:
+                os.remove(temp_file)
+            except Exception:
+                pass
+        raise e
+
+
+def delete_blog(blog_id):
+    """
+    Delete a math article by its ID.
+    Returns True if removed, False if not found.
+    """
+    blogs = load_blogs()
+    original_count = len(blogs)
+    filtered = [b for b in blogs if str(b.get('id')) != str(blog_id)]
+    if len(filtered) < original_count:
+        save_blogs(filtered)
+        return True
+    return False
 
 
 def calculate_read_time(content):
@@ -56,16 +80,28 @@ def calculate_read_time(content):
     return f"{minutes} min read"
 
 
-def get_filtered_blogs(category='All', search=''):
+def get_filtered_blogs(category='All', search='', tag=''):
     """
-    Fetch articles filtered by category and search keyword, sorted by date descending.
+    Fetch articles filtered by category, tag, and search keyword, sorted by date descending.
     """
     category = (category or 'All').strip()
     search = (search or '').strip().lower()
+    tag = (tag or '').strip().lower()
     blogs = load_blogs()
 
     if category and category != 'All':
-        blogs = [b for b in blogs if b.get('category', '').lower() == category.lower()]
+        blogs = [
+            b for b in blogs
+            if b.get('category', '').lower() == category.lower()
+            or any(category.lower() == t.lower() for t in b.get('tags', []))
+        ]
+
+    if tag and tag != 'all':
+        blogs = [
+            b for b in blogs
+            if any(tag.lower() == t.lower() for t in b.get('tags', []))
+            or b.get('category', '').lower() == tag.lower()
+        ]
         
     if search:
         blogs = [
@@ -74,7 +110,7 @@ def get_filtered_blogs(category='All', search=''):
             or search in b.get('subtitle', '').lower()
             or search in b.get('content', '').lower()
             or search in b.get('author', '').lower()
-            or any(search in tag.lower() for tag in b.get('tags', []))
+            or any(search in t.lower() for t in b.get('tags', []))
         ]
 
     blogs.sort(key=lambda x: x.get('id', '0'), reverse=True)

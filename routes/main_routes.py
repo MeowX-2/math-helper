@@ -16,6 +16,19 @@ def index():
     return render_template('index.html')
 
 
+@main_bp.route('/api/health', methods=['GET'])
+def health_check():
+    """
+    GET /api/health
+    Health check endpoint returning system status.
+    """
+    return jsonify({
+        'status': 'healthy',
+        'application': 'HintSpark AI Math Helper',
+        'version': '2.0.0'
+    })
+
+
 @main_bp.route('/api/check_key', methods=['GET'])
 def check_key():
     """

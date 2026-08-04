@@ -5,7 +5,7 @@ Serves REST API endpoints for blog management and real-time AI tutor interaction
 """
 
 from flask import Blueprint, request, jsonify
-from services.blog_service import get_filtered_blogs, create_new_blog
+from services.blog_service import get_filtered_blogs, create_new_blog, delete_blog
 from services.ai_service import get_tutor_hint
 
 api_bp = Blueprint('api', __name__)
@@ -15,12 +15,13 @@ api_bp = Blueprint('api', __name__)
 def get_blogs():
     """
     GET /api/blogs
-    Fetch list of math blog posts with optional category filter and keyword search.
+    Fetch list of math blog posts with optional category filter, tag filter, and keyword search.
     """
     try:
         category = request.args.get('category', 'All')
         search = request.args.get('search', '')
-        blogs = get_filtered_blogs(category, search)
+        tag = request.args.get('tag', '')
+        blogs = get_filtered_blogs(category, search, tag)
         return jsonify({
             'status': 'success',
             'count': len(blogs),
@@ -46,18 +47,35 @@ def add_blog():
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
 
+@api_bp.route('/api/blogs/<blog_id>', methods=['DELETE'])
+def remove_blog(blog_id):
+    """
+    DELETE /api/blogs/<blog_id>
+    Remove a math article by ID.
+    """
+    try:
+        success = delete_blog(blog_id)
+        if success:
+            return jsonify({'status': 'success', 'message': 'Article deleted successfully.'})
+        return jsonify({'status': 'error', 'message': 'Article not found.'}), 404
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
 @api_bp.route('/get_hint', methods=['POST'])
 def get_hint():
     """
     POST /get_hint
     Generate a guided hint for a math problem using Gemini API or Anthropic Claude API.
+    Supports optional conversation history for multi-turn chat.
     """
     try:
         data = request.json or {}
         user_input = data.get('prompt', '')
+        history = data.get('history', [])
         client_key = request.headers.get('X-Gemini-API-Key') or data.get('api_key', '')
 
-        response_text = get_tutor_hint(user_input, client_key)
+        response_text = get_tutor_hint(user_input, history=history, client_key_header=client_key)
         return jsonify({
             'status': 'success',
             'response': response_text
@@ -66,3 +84,4 @@ def get_hint():
         return jsonify({'status': 'error', 'message': str(ve)}), 400
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 400
+

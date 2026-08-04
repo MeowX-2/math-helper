@@ -7,7 +7,9 @@
 
 // Application State Variables
 let currentTopic = 'All'; // Active category filter
+let currentTag = 'All';   // Active tag filter
 let heroArticle = null;   // Currently featured top article
+let allArticlesList = []; // Cached all articles list
 
 /**
  * Render mathematical expressions inside a DOM element using KaTeX.
@@ -43,7 +45,6 @@ function renderFormattedContent(container, content) {
         return;
     }
 
-    // 1. Extract and protect math expressions using unique placeholders (no markdown special characters)
     const mathBlocks = [];
     
     // Protect display math $$...$$
@@ -58,7 +59,7 @@ function renderFormattedContent(container, content) {
         return `@@KATEXMATH${mathBlocks.length - 1}@@`;
     });
 
-    // 2. Parse Markdown to HTML via marked.js
+    // Parse Markdown to HTML via marked.js
     let html = '';
     if (typeof marked !== 'undefined' && typeof marked.parse === 'function') {
         try {
@@ -71,33 +72,34 @@ function renderFormattedContent(container, content) {
         html = escapeHtml(protectedText).replace(/\n/g, '<br>');
     }
 
-    // 3. Restore protected math blocks back into HTML
+    // Restore protected math blocks
     html = html.replace(/@@KATEXMATH(\d+)@@/g, (match, id) => {
         return mathBlocks[parseInt(id, 10)] || '';
     });
 
-    // 4. Update container innerHTML
     container.innerHTML = html;
-
-    // 5. Render KaTeX expressions inside container
     renderMath(container);
 }
 
 /**
  * Asynchronously fetch article records from backend REST API with optional
- * topic category filter and live keyword search.
+ * category, tag filter, and live keyword search.
  */
 async function fetchArticles() {
     try {
         const searchInput = document.getElementById('search-input');
         const searchVal = searchInput ? searchInput.value.trim() : '';
-        const url = `/api/blogs?category=${encodeURIComponent(currentTopic)}&search=${encodeURIComponent(searchVal)}`;
+        const url = `/api/blogs?category=${encodeURIComponent(currentTopic)}&tag=${encodeURIComponent(currentTag)}&search=${encodeURIComponent(searchVal)}`;
         
         const res = await fetch(url);
         const data = await res.json();
 
         if (data.status === 'success') {
+            if (currentTopic === 'All' && currentTag === 'All' && !searchVal) {
+                allArticlesList = data.blogs;
+            }
             renderArticles(data.blogs);
+            renderTagFilterBars(allArticlesList.length > 0 ? allArticlesList : data.blogs);
         }
     } catch (err) {
         console.error('Error fetching articles:', err);
@@ -105,8 +107,96 @@ async function fetchArticles() {
 }
 
 /**
+ * Render dynamic Tag Cloud in sidebar and Tag Bar above article grid.
+ * @param {Array} blogs - Full array of blog post objects.
+ */
+function renderTagFilterBars(blogs) {
+    const mainTagBar = document.getElementById('main-tag-filter-bar');
+    const sidebarTagCloud = document.getElementById('sidebar-tag-cloud');
+    if (!blogs) return;
+
+    // Collect unique tags
+    const tagMap = new Map();
+    blogs.forEach(b => {
+        const tags = b.tags && Array.isArray(b.tags) ? b.tags : [b.category || 'Math'];
+        tags.forEach(t => {
+            const clean = t.trim();
+            if (clean) tagMap.set(clean, (tagMap.get(clean) || 0) + 1);
+        });
+    });
+
+    const uniqueTags = Array.from(tagMap.keys());
+
+    // Render Main Tag Filter Bar above grid
+    if (mainTagBar) {
+        mainTagBar.innerHTML = '';
+        
+        const allBtn = document.createElement('button');
+        allBtn.className = `tag-chip-btn ${currentTag === 'All' ? 'active' : ''}`;
+        allBtn.textContent = '🏷️ All Tags';
+        allBtn.onclick = () => filterByTag('All');
+        mainTagBar.appendChild(allBtn);
+
+        uniqueTags.forEach(tag => {
+            const btn = document.createElement('button');
+            btn.className = `tag-chip-btn ${currentTag.toLowerCase() === tag.toLowerCase() ? 'active' : ''}`;
+            btn.textContent = `#${tag}`;
+            btn.onclick = () => filterByTag(tag);
+            mainTagBar.appendChild(btn);
+        });
+    }
+
+    // Render Sidebar Tag Cloud
+    if (sidebarTagCloud) {
+        sidebarTagCloud.innerHTML = '';
+
+        uniqueTags.forEach(tag => {
+            const tagBadge = document.createElement('span');
+            tagBadge.className = `sidebar-tag-badge ${currentTag.toLowerCase() === tag.toLowerCase() ? 'active' : ''}`;
+            tagBadge.textContent = `#${tag}`;
+            tagBadge.onclick = () => filterByTag(tag);
+            sidebarTagCloud.appendChild(tagBadge);
+        });
+    }
+}
+
+/**
+ * Filter feed stories by selecting a specific tag.
+ * @param {string} tag - Selected tag name ('All', 'UserGuide', 'Calculus', etc.)
+ */
+function filterByTag(tag) {
+    currentTag = tag;
+    currentTopic = 'All';
+
+    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+    const allNavItem = document.getElementById('nav-item-all');
+    if (allNavItem && tag === 'All') allNavItem.classList.add('active');
+
+    document.getElementById('page-heading').textContent = tag === 'All' ? 'Mathematical Insights & Essays' : `#${tag} Archive`;
+    document.getElementById('grid-label').textContent = tag === 'All' ? 'Recent Math Articles' : `Articles tagged with #${tag}`;
+    fetchArticles();
+}
+
+/**
+ * Open the HintSpark User Guide & Showcase article directly.
+ * @param {HTMLElement} navElement - Navigation DOM element clicked.
+ */
+function openUserGuide(navElement) {
+    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+    if (navElement) navElement.classList.add('active');
+
+    filterByTag('UserGuide');
+    
+    // Find UserGuide article if loaded
+    const guideArticle = allArticlesList.find(b => b.category === 'UserGuide' || b.id === '100' || (b.tags && b.tags.includes('UserGuide')));
+    if (guideArticle) {
+        openReader(guideArticle);
+    }
+}
+
+/**
  * Populate DOM with articles data into the Featured Hero card and Articles Grid.
- * @param {Array} blogs - Array of blog post objects returned from the backend API.
+ * @param {Array} blogs - Array of blog post objects returned from backend.
  */
 function renderArticles(blogs) {
     const heroSection = document.getElementById('hero-card');
@@ -135,6 +225,24 @@ function renderArticles(blogs) {
     document.getElementById('hero-author').textContent = heroArticle.author;
     document.getElementById('hero-date').textContent = heroArticle.date;
     document.getElementById('hero-readtime').textContent = `📖 ${heroArticle.read_time || '2 min read'}`;
+
+    // Render Hero Tag Chips
+    const heroTagsElem = document.getElementById('hero-tags');
+    if (heroTagsElem) {
+        heroTagsElem.innerHTML = '';
+        const tags = heroArticle.tags && heroArticle.tags.length > 0 ? heroArticle.tags : [heroArticle.category || 'Math'];
+        tags.forEach(t => {
+            const tagSpan = document.createElement('span');
+            tagSpan.className = 'hero-tag-pill';
+            tagSpan.textContent = `#${t}`;
+            tagSpan.onclick = (e) => {
+                e.stopPropagation();
+                filterByTag(t);
+            };
+            heroTagsElem.appendChild(tagSpan);
+        });
+    }
+
     renderMath(heroSection);
 
     // Render Remaining Articles in Substack-Style Grid
@@ -144,9 +252,12 @@ function renderArticles(blogs) {
         card.className = 'article-card';
         card.onclick = () => openReader(blog);
 
+        const blogTags = blog.tags && blog.tags.length > 0 ? blog.tags : [blog.category || 'MATH'];
+        const tagsHtml = blogTags.map(t => `<span class="card-tag-pill" onclick="event.stopPropagation(); filterByTag('${escapeHtml(t)}')">#${escapeHtml(t)}</span>`).join(' ');
+
         card.innerHTML = `
             <div>
-                <div class="article-card-tag">${escapeHtml(blog.category || 'MATH')}</div>
+                <div class="card-tags-bar">${tagsHtml}</div>
                 <h3 class="article-card-title">${escapeHtml(blog.title)}</h3>
                 <p class="article-card-subtitle">${escapeHtml(blog.subtitle || (blog.content.substring(0, 110) + '...'))}</p>
             </div>
@@ -163,11 +274,12 @@ function renderArticles(blogs) {
 
 /**
  * Filter feed articles by selecting a specific topic category.
- * @param {string} topic - Category name ('All', 'NumberTheory', 'Calculus', etc.)
+ * @param {string} topic - Category name ('All', 'Calculus', etc.)
  * @param {HTMLElement} element - Clicked DOM sidebar navigation link.
  */
 function selectTopic(topic, element) {
     currentTopic = topic;
+    currentTag = 'All';
     document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
     if (element) element.classList.add('active');
 
@@ -181,7 +293,8 @@ function selectTopic(topic, element) {
  */
 function resetTopic() {
     document.getElementById('search-input').value = '';
-    selectTopic('All', document.querySelector('.nav-item'));
+    currentTag = 'All';
+    selectTopic('All', document.getElementById('nav-item-all'));
 }
 
 /**
@@ -207,11 +320,59 @@ function openReader(article) {
     document.getElementById('reader-date').textContent = article.date;
     document.getElementById('reader-readtime').textContent = `📖 ${article.read_time || '3 min read'}`;
 
+    // Render tags in reader modal
+    const readerTagsElem = document.getElementById('reader-tags');
+    if (readerTagsElem) {
+        readerTagsElem.innerHTML = '';
+        const tags = article.tags && article.tags.length > 0 ? article.tags : [article.category || 'Math'];
+        tags.forEach(t => {
+            const span = document.createElement('span');
+            span.className = 'reader-tag-pill';
+            span.textContent = `#${t}`;
+            span.onclick = () => {
+                closeReader();
+                filterByTag(t);
+            };
+            readerTagsElem.appendChild(span);
+        });
+    }
+
+    // Wire Delete Article button
+    const deleteBtn = document.getElementById('reader-delete-btn');
+    if (deleteBtn) {
+        deleteBtn.onclick = () => deleteArticle(article.id);
+    }
+
     const bodyElem = document.getElementById('reader-body');
     renderFormattedContent(bodyElem, article.content);
 
     document.getElementById('reader-overlay').classList.add('active');
     document.body.style.overflow = 'hidden'; // Prevent background scrolling
+}
+
+/**
+ * Delete an article by ID with user confirmation toast.
+ * @param {string} articleId - Target article ID.
+ */
+async function deleteArticle(articleId) {
+    if (!confirm('Are you sure you want to delete this article? This action cannot be undone.')) {
+        return;
+    }
+
+    try {
+        const res = await fetch(`/api/blogs/${encodeURIComponent(articleId)}`, { method: 'DELETE' });
+        const data = await res.json();
+        if (res.ok && data.status === 'success') {
+            closeReader();
+            showToast('Article deleted successfully!', 'info');
+            fetchArticles();
+        } else {
+            showToast(`Delete failed: ${data.message || 'Unknown error'}`, 'error');
+        }
+    } catch (err) {
+        console.error('Delete error:', err);
+        showToast('Network error while deleting article', 'error');
+    }
 }
 
 /**
@@ -253,6 +414,7 @@ async function handlePublishSubmit(e) {
     const subtitle = document.getElementById('pub-subtitle').value.trim();
     const author = document.getElementById('pub-author').value.trim();
     const category = document.getElementById('pub-category').value;
+    const tagsInput = document.getElementById('pub-tags') ? document.getElementById('pub-tags').value.trim() : '';
     const content = document.getElementById('pub-content').value.trim();
 
     if (!title || !content) return;
@@ -261,7 +423,7 @@ async function handlePublishSubmit(e) {
         const res = await fetch('/api/blogs', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ title, subtitle, author, category, content })
+            body: JSON.stringify({ title, subtitle, author, category, tags: tagsInput, content })
         });
         const data = await res.json();
         
@@ -282,6 +444,107 @@ async function handlePublishSubmit(e) {
 // ==============================================================================
 // AI Tutor Assistant Logic (Side Drawer Chat)
 // ==============================================================================
+
+// Chat memory state for multi-turn conversation
+let chatHistory = [];
+
+/** Load saved conversation history from sessionStorage on page load. */
+function restoreChatHistory() {
+    try {
+        const saved = sessionStorage.getItem('hintspark_chat_history');
+        if (saved) {
+            chatHistory = JSON.parse(saved);
+            renderChatHistoryUI();
+        }
+    } catch (e) {
+        console.warn('Error restoring chat history:', e);
+        chatHistory = [];
+    }
+}
+
+/** Save active conversation history to sessionStorage. */
+function saveChatHistory() {
+    try {
+        sessionStorage.setItem('hintspark_chat_history', JSON.stringify(chatHistory));
+    } catch (e) {
+        console.warn('Error saving chat history:', e);
+    }
+}
+
+/**
+ * Handle keydown events on tutor input textarea (Enter to send, Shift+Enter for newline).
+ * @param {KeyboardEvent} e - Keyboard event.
+ */
+function handleTutorInputKeyDown(e) {
+    const input = e.target;
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendTutorMessage();
+    } else {
+        setTimeout(() => {
+            input.style.height = 'auto';
+            input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+        }, 0);
+    }
+}
+
+/**
+ * Attach a sleek copy-to-clipboard button on an AI message bubble.
+ * @param {HTMLElement} msgDiv - Target DOM message element.
+ * @param {string} textContent - Raw text to copy.
+ */
+function attachCopyButton(msgDiv, textContent) {
+    if (!msgDiv || !textContent) return;
+    const copyBtn = document.createElement('button');
+    copyBtn.className = 'tutor-copy-btn';
+    copyBtn.title = 'Copy response text';
+    copyBtn.innerHTML = '📋 Copy';
+    copyBtn.onclick = (e) => {
+        e.stopPropagation();
+        navigator.clipboard.writeText(textContent).then(() => {
+            copyBtn.innerHTML = '✅ Copied!';
+            setTimeout(() => { copyBtn.innerHTML = '📋 Copy'; }, 2000);
+        }).catch(err => {
+            console.warn('Clipboard copy warning:', err);
+        });
+    };
+    msgDiv.appendChild(copyBtn);
+}
+
+/** Render stored chat history bubbles into the drawer container. */
+function renderChatHistoryUI() {
+    const container = document.getElementById('tutor-messages');
+    if (!container) return;
+
+    container.innerHTML = `
+        <div class="tutor-msg tutor-ai-msg">
+            Hello! I am your Socratic AI math tutor. Ask me any equation or problem concept — I will guide you with targeted questions and hints without giving away the final solution!
+        </div>
+    `;
+
+    chatHistory.forEach(msg => {
+        const msgDiv = document.createElement('div');
+        if (msg.role === 'user') {
+            msgDiv.className = 'tutor-msg tutor-user-msg';
+            msgDiv.textContent = msg.content;
+        } else {
+            msgDiv.className = 'tutor-msg tutor-ai-msg';
+            renderFormattedContent(msgDiv, msg.content);
+            attachCopyButton(msgDiv, msg.content);
+        }
+        container.appendChild(msgDiv);
+    });
+
+    container.scrollTop = container.scrollHeight;
+}
+
+/** Reset active conversation session and clear chat memory history. */
+function resetTutorChat() {
+    chatHistory = [];
+    sessionStorage.removeItem('hintspark_chat_history');
+    renderChatHistoryUI();
+    showToast('Started a new conversation session', 'info');
+}
 
 /** Toggle AI Math Tutor side drawer visibility. Prompt for API key if missing. */
 async function toggleTutorDrawer() {
@@ -307,7 +570,7 @@ async function toggleTutorDrawer() {
 }
 
 /**
- * Send user's math problem prompt to backend `/get_hint` endpoint
+ * Send user's math problem prompt to backend `/get_hint` endpoint with conversation history
  * and render the tutor's Markdown + LaTeX-annotated response.
  */
 async function sendTutorMessage() {
@@ -318,13 +581,20 @@ async function sendTutorMessage() {
 
     const container = document.getElementById('tutor-messages');
 
-    // 1. Append User Prompt Bubble
+    // 1. Append User Prompt Bubble & record in memory state
     const userMsg = document.createElement('div');
     userMsg.className = 'tutor-msg tutor-user-msg';
     userMsg.textContent = prompt;
     container.appendChild(userMsg);
     input.value = '';
+    input.style.height = 'auto';
     container.scrollTop = container.scrollHeight;
+
+    // Snapshot current prior history to send to backend
+    const priorHistory = [...chatHistory];
+
+    // Add user turn to local history array
+    chatHistory.push({ role: 'user', content: prompt });
 
     // 2. Append Loading Indicator
     const loadingMsg = document.createElement('div');
@@ -355,7 +625,7 @@ async function sendTutorMessage() {
         const res = await fetch('/get_hint', {
             method: 'POST',
             headers: headers,
-            body: JSON.stringify({ prompt })
+            body: JSON.stringify({ prompt, history: priorHistory })
         });
         
         let data = {};
@@ -378,7 +648,12 @@ async function sendTutorMessage() {
 
         if (data.status === 'success' && data.response) {
             renderFormattedContent(aiMsg, data.response);
+            attachCopyButton(aiMsg, data.response);
+            chatHistory.push({ role: 'assistant', content: data.response });
+            saveChatHistory();
         } else {
+            // Revert last user prompt from history if call failed
+            chatHistory.pop();
             const errText = data.message || 'Unable to generate hint. Please check your API key.';
             renderFormattedContent(aiMsg, `Error: ${errText}`);
             if (errText.includes('API key') || errText.includes('API Key') || errText.includes('401') || errText.includes('INVALID')) {
@@ -390,6 +665,7 @@ async function sendTutorMessage() {
         container.scrollTop = container.scrollHeight;
     } catch (err) {
         console.error('Tutor error:', err);
+        chatHistory.pop(); // Revert failed turn
         const activeLoading = document.getElementById('active-loading-msg');
         if (activeLoading) activeLoading.remove();
 
@@ -571,6 +847,7 @@ document.addEventListener('keydown', (e) => {
 // Initialize application on DOM ready
 document.addEventListener('DOMContentLoaded', () => {
     fetchArticles();
+    restoreChatHistory();
     
     // Register PWA Service Worker for App Mode Installation
     if ('serviceWorker' in navigator) {

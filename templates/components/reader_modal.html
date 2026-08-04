@@ -2,17 +2,23 @@
 <div class="reader-overlay" id="reader-overlay">
     <button class="btn-close-reader" onclick="closeReader()" title="Close Article Reader">✕</button>
     <article class="reader-content">
-        <div class="reader-tag" id="reader-tag">CATEGORY</div>
+        <div class="reader-tag-wrap" style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.8rem;">
+            <div class="reader-tag" id="reader-tag">CATEGORY</div>
+            <div class="reader-tags-list" id="reader-tags"></div>
+        </div>
         <h1 class="reader-title" id="reader-title">Title</h1>
         <p class="reader-subtitle" id="reader-subtitle">Subtitle</p>
 
         <!-- Article Metadata Strip -->
-        <div class="meta-strip" style="margin-bottom: 2.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-color);">
-            <span class="meta-author" id="reader-author">Author</span>
-            <span class="dot">•</span>
-            <span id="reader-date">Date</span>
-            <span class="dot">•</span>
-            <span id="reader-readtime">📖 3 min read</span>
+        <div class="meta-strip" style="margin-bottom: 2.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <span class="meta-author" id="reader-author">Author</span>
+                <span class="dot">•</span>
+                <span id="reader-date">Date</span>
+                <span class="dot">•</span>
+                <span id="reader-readtime">📖 3 min read</span>
+            </div>
+            <button id="reader-delete-btn" class="btn-delete-article" title="Delete Article">🗑️ Delete Article</button>
         </div>
 
         <!-- Article Body with LaTeX Render Target -->
