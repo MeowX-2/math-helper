@@ -19,16 +19,18 @@
         </div>
     </div>
 
-    <!-- Quick Suggest Chips -->
-    <div class="tutor-chips-bar">
-        <button class="tutor-chip" onclick="setTutorPrompt('How do I solve $x^2 - 5x + 6 = 0$?')">Algebra</button>
-        <button class="tutor-chip" onclick="setTutorPrompt('Explain the intuition behind $\\int x^2 dx$')">Calculus</button>
-        <button class="tutor-chip" onclick="setTutorPrompt('Why is $e^{i\\pi} + 1 = 0$ true?')">Euler</button>
-    </div>
+    <!-- Chat Drawer Footer Controls -->
+    <div class="tutor-footer">
+        <div class="tutor-chips-bar">
+            <span class="chips-label">Quick Prompts:</span>
+            <button class="tutor-chip" onclick="setTutorPrompt('How do I solve $x^2 - 5x + 6 = 0$?')">Algebra</button>
+            <button class="tutor-chip" onclick="setTutorPrompt('Explain the intuition behind $\\int x^2 dx$')">Calculus</button>
+            <button class="tutor-chip" onclick="setTutorPrompt('Why is $e^{i\\pi} + 1 = 0$ true?')">Euler</button>
+        </div>
 
-    <!-- Chat Input Form -->
-    <div class="tutor-input-bar">
-        <textarea id="tutor-input" rows="1" placeholder="Ask a math problem (e.g. $x^2 - 4 = 0$)... Press Enter to send, Shift+Enter for new line" onkeydown="handleTutorInputKeyDown(event)"></textarea>
-        <button id="tutor-send-btn" onclick="sendTutorMessage()">Ask</button>
+        <div class="tutor-input-bar">
+            <textarea id="tutor-input" rows="1" placeholder="Ask a math problem (e.g. $x^2 - 4 = 0$)..." onkeydown="handleTutorInputKeyDown(event)"></textarea>
+            <button id="tutor-send-btn" onclick="sendTutorMessage()">Ask</button>
+        </div>
     </div>
 </div>

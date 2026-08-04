@@ -570,6 +570,17 @@ async function toggleTutorDrawer() {
 }
 
 /**
+ * Handle Enter keypress in tutor input textarea (Enter to send, Shift+Enter for new line).
+ * @param {KeyboardEvent} e - Event object.
+ */
+function handleTutorInputKeyDown(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendTutorMessage();
+    }
+}
+
+/**
  * Send user's math problem prompt to backend `/get_hint` endpoint with conversation history
  * and render the tutor's Markdown + LaTeX-annotated response.
  */
@@ -587,7 +598,7 @@ async function sendTutorMessage() {
     userMsg.textContent = prompt;
     container.appendChild(userMsg);
     input.value = '';
-    input.style.height = 'auto';
+    input.style.height = '';
     container.scrollTop = container.scrollHeight;
 
     // Snapshot current prior history to send to backend
