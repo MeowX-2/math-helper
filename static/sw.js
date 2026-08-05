@@ -3,7 +3,7 @@
  * Caches static shell assets for instant app loading.
  */
 
-const CACHE_NAME = 'hintspark-v1';
+const CACHE_NAME = 'hintspark-v5';
 const ASSETS = [
   '/',
   '/static/css/style.css',

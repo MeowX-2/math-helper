@@ -15,54 +15,6 @@
     ],
     "date": "August 4, 2026",
     "read_time": "4 min read",
-    "content": "Welcome to **HintSpark** — your ultimate interactive AI-powered math learning hub, article publisher, and study assistant.\n\nThis manual provides a complete walkthrough of all features and best practices to help you get the most out of the application.\n\n---\n\n### 🤖 1. Multi-Turn AI Math Assistant (Context Memory)\n\nHintSpark features an integrated **AI Math Tutor** side drawer that retains full conversation context:\n- **Accessing the Tutor**: Click **🤖 AI Math Assistant** in the sidebar or click the floating bot shortcut.\n- **Asking Follow-Up Questions**: Unlike simple search boxes, HintSpark remembers prior questions and answers. You can ask an initial problem like:\n  $$\\text{Solve } x^2 - 5x + 6 = 0$$\n  And follow up naturally with:\n  *\"Can you explain how you factored that step?\"* or *\"What if the coefficient of $x^2$ is 2?\"*\n- **Starting a New Conversation**: Click the **🔄 New Chat** button in the AI Assistant header at any time to clear memory and start a fresh session.\n\n---\n\n### 📐 2. Interactive LaTeX & Math Notation\n\nHintSpark parses both inline and display LaTeX notation seamlessly:\n- **Inline LaTeX**: Wrap equations in single dollar signs, such as $E = mc^2$ or $a^2 + b^2 = c^2$.\n- **Display Equations**: Wrap complex formulas in double dollar signs for centered, high-contrast math blocks:\n\n$$\\int_{-\\infty}^{\\infty} e^{-x^2} \\, dx = \\sqrt{\\pi}$$\n\n$$\\lim_{n \\to \\infty} \\left(1 + \\frac{1}{n}\\right)^n = e$$\n\n$$\\begin{bmatrix} a & b \\\\ c & d \\end{bmatrix} \\begin{bmatrix} x \\\\ y \\end{bmatrix} = \\begin{bmatrix} ax + by \\\\ cx + dy \\end{bmatrix}$$\n\n---\n\n### 🏷️ 3. Tag-Based Topic System\n\nTopics are organized dynamically through **Interactive Tags** instead of rigid sidebar lists:\n- Every article displays tag chips (e.g. `#Calculus`, `#Algebra`, `#UserGuide`, `#NumberTheory`).\n- Click any tag chip on an article card or in the top Tag Filter bar to filter your feed instantly.\n\n---\n\n### ✍️ 4. Publishing & Writing Math Articles\n\nShare your own mathematical proofs, notes, or essays with the community:\n1. Click **+ New Article** in the sidebar.\n2. Enter your title, author name, category, comma-separated tags (e.g. `Calculus, Integrals`), and Markdown/LaTeX content.\n3. Click **Publish Article** — your post will render instantly with estimated read time calculations.\n\n---\n\n### ⚙️ 5. API Key Configuration & Storage\n\nHintSpark supports both **Google Gemini API** and **Anthropic Claude API**:\n- Open **⚙️ API Settings** to save your key.\n- Keys are saved locally in your browser storage and automatically written to the server's `.env` file for backend requests."
-  },
-  {
-    "id": "101",
-    "title": "The Intuition Behind the Fundamental Theorem of Calculus",
-    "subtitle": "Bridging the gap between differential slope and integral area through visual and mathematical reasoning.",
-    "author": "Dr. Sarah Chen",
-    "category": "Calculus",
-    "tags": [
-      "Calculus",
-      "Analysis",
-      "Integration",
-      "Derivatives"
-    ],
-    "date": "August 3, 2026",
-    "read_time": "3 min read",
-    "content": "The Fundamental Theorem of Calculus (FTC) establishes a profound connection between the derivative (rate of change) and the definite integral (accumulation of quantity).\n\n### The First Part (FTC 1)\nIf $f$ is continuous on $[a, b]$, then the function $F(x)$ defined by:\n\n$$F(x) = \\int_{a}^{x} f(t) \\, dt$$\n\nis continuous on $[a, b]$, differentiable on $(a, b)$, and its derivative is:\n\n$$F'(x) = f(x)$$\n\n### Intuitive Reasoning\nImagine accumulation as water filling a reservoir. The total volume at time $x$ is $F(x)$, while the instantaneous rate of flow at time $x$ is $f(x)$. The rate at which accumulated volume grows is precisely equal to the current flow rate!"
-  },
-  {
-    "id": "102",
-    "title": "Riemann Zeta Function & The Distribution of Prime Numbers",
-    "subtitle": "How complex zeros of $\\zeta(s)$ govern the prime number theorem and mysterious distribution of primes.",
-    "author": "Marcus Vance",
-    "category": "NumberTheory",
-    "tags": [
-      "NumberTheory",
-      "Primes",
-      "ZetaFunction",
-      "ComplexAnalysis"
-    ],
-    "date": "August 2, 2026",
-    "read_time": "4 min read",
-    "content": "Prime numbers are the atoms of arithmetic, yet their individual distribution appears pseudorandom. Bernhard Riemann discovered that prime distribution is encoded in the zeros of the zeta function.\n\n### Euler's Product Formula\nFor $\\text{Re}(s) > 1$, the Riemann Zeta function links infinite series with all prime numbers $p$:\n\n$$\\zeta(s) = \\sum_{n=1}^{\\infty} \\frac{1}{n^s} = \\prod_{p \\text{ prime}} \\frac{1}{1 - p^{-s}}$$\n\n### The Riemann Hypothesis\nThe famous unproven hypothesis asserts that all non-trivial zeros of $\\zeta(s)$ lie on the critical line:\n\n$$\\text{Re}(s) = \\frac{1}{2}$$\n\nIf true, it provides the tightest possible error bound for the Prime Number Theorem $\\pi(x) \\sim \\frac{x}{\\ln x}$."
-  },
-  {
-    "id": "103",
-    "title": "Geometric Intuition of Eigenvalues and Eigenvectors",
-    "subtitle": "Understanding linear transformations through invariant directions and scaling factors.",
-    "author": "Elena Rostova",
-    "category": "Algebra",
-    "tags": [
-      "Algebra",
-      "LinearAlgebra",
-      "Matrices",
-      "Vectors"
-    ],
-    "date": "August 1, 2026",
-    "read_time": "3 min read",
-    "content": "When a linear transformation acts on a vector space, most vectors change both direction and length. However, eigenvectors maintain their exact spatial orientation.\n\n### Defining Equation\nFor a square matrix $A$, a non-zero vector $\\mathbf{v}$ is an eigenvector if:\n\n$$A \\mathbf{v} = \\lambda \\mathbf{v}$$\n\nwhere $\\lambda$ is a scalar known as the **eigenvalue**.\n\n### Characteristic Polynomial\nTo calculate eigenvalues, we solve the characteristic equation:\n\n$$\\det(A - \\lambda I) = 0$$\n\nEigenvalues power principal component analysis (PCA), quantum mechanics state representations, and PageRank algorithms!"
+    "content": "Welcome to **HintSpark** — your ultimate interactive AI-powered math learning hub, article publisher, and study assistant.\n\nThis manual provides a complete walkthrough of all features and best practices to help you get the most out of the application.\n\n---\n\n### 🤖 1. Multi-Turn AI Math Assistant (Context Memory)\n\nHintSpark features an integrated **AI Math Tutor** side drawer that retains full conversation context:\n- **Accessing the Tutor**: Click **🤖 AI Math Assistant** in the sidebar or click the floating bot shortcut.\n- **Asking Follow-Up Questions**: Unlike simple search boxes, HintSpark remembers prior questions and answers. You can ask an initial problem like:\n  $$\\text{Solve } x^2 - 5x + 6 = 0$$\n  And follow up naturally with:\n  *\"Can you explain how you factored that step?\"* or *\"What if the coefficient of $x^2$ is 2?\"*\n- **Starting a New Conversation**: Click the **🔄 New Chat** button in the AI Assistant header at any time to clear memory and start a fresh session.\n\n---\n\n### 📐 2. Interactive LaTeX & Math Notation\n\nHintSpark parses both inline and display LaTeX notation seamlessly:\n- **Inline LaTeX**: Wrap equations in single dollar signs, such as $E = mc^2$ or $a^2 + b^2 = c^2$.\n- **Display Equations**: Wrap complex formulas in double dollar signs for centered, high-contrast math blocks:\n\n$$\\int_{-\\infty}^{\\infty} e^{-x^2} \\, dx = \\sqrt{\\pi}$$\n\n$$\\lim_{n \\to \\infty} \\left(1 + \\frac{1}{n}\\right)^n = e$$\n\n$$\\begin{bmatrix} a & b \\\\ c & d \\end{bmatrix} \\begin{bmatrix} x \\\\ y \\end{bmatrix} = \\begin{bmatrix} ax + by \\\\ cx + dy \\end{bmatrix}$$\n\n---\n\n### 🏷️ 3. Tag-Based Topic System\n\nTopics are organized dynamically through **Interactive Tags** instead of rigid sidebar lists:\n- Every article displays tag chips (e.g. `#Calculus`, `#Algebra`, `#UserGuide`, `#NumberTheory`).\n- Click any tag chip on an article card or in the top Tag Filter bar to filter your feed instantly.\n\n---\n\n### ✍️ 4. Publishing & Writing Math Articles\n\nShare your own mathematical proofs, notes, or essays with the community:\n1. Click **+ New Article** in the sidebar.\n2. Enter your title, author name, category, comma-separated tags (e.g. `Calculus, Integrals`), and Markdown/LaTeX content.\n3. Click **Publish Article** — your post will render instantly with estimated read time calculations.\n\n---\n\n### ⚙️ 5. API Key Configuration & Storage\n\nHintSpark supports both **Google Gemini API** and **Anthropic Claude API**:\n- Open **⚙️ API Settings** to save your key.\n- Keys are saved locally in your browser storage and automatically written to the server's `.env` file for backend requests.\n\n---\n\n### 🗑️ 6. Deleting & Removing Articles\n\nRemove any published article from your feed easily:\n- **Via Web UI**: Open the target article, click the red **🗑️ Delete Article** button in the header metadata bar, and confirm.\n- **Via API**: Send a `DELETE` request to `/api/blogs/<article_id>`.\n- **Via Storage File**: Open `data/blogs.json`, remove the article's JSON block, and save."
   }
 ]

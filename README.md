@@ -13,7 +13,7 @@ Unlike standard AI search tools that immediately output solutions, HintSpark act
 - 📁 **Automated `.env` Generation**: Typing an API key into the UI automatically generates and configures a clean local `.env` file on disk.
 - 📐 **LaTeX Math Rendering**: Inline (`$x^2 + y^2 = 1$`) and display (`$$\int_0^\infty f(x) dx$$`) math formatting rendered seamlessly via KaTeX.
 - 📰 **Mathematical Essays & Feed**: Substack-style article grid with dynamic category navigation (*Number Theory*, *Calculus*, *Algebra*, *Geometry*) and live search.
-- ✍️ **Article Publishing**: Publish community mathematical stories with automatic read-time estimation based on content and LaTeX complexity.
+- ✍️ **Article Publishing & Deletion**: Publish mathematical stories with estimated read times, or delete existing posts via the reader UI or REST API.
 - 🌙 **Dark & Light Mode**: Instant theme switching with tailored contrast palettes.
 - 📱 **Android & Desktop App Modes**: Install directly on Android/iOS via PWA, build an Android `.apk` via Bubblewrap, or run as a native desktop application (`desktop_app.py`).
 

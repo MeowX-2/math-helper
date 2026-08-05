@@ -12,6 +12,21 @@ let heroArticle = null;   // Currently featured top article
 let allArticlesList = []; // Cached all articles list
 
 /**
+ * Safely escape HTML special characters.
+ * @param {string} str - Raw input string.
+ * @returns {string} Escaped HTML string.
+ */
+function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+/**
  * Render mathematical expressions inside a DOM element using KaTeX.
  * Parses both inline ($...$) and block ($$...$$) LaTeX expressions.
  * @param {HTMLElement} element - Target container element to search for LaTeX tokens.
@@ -247,29 +262,39 @@ function renderArticles(blogs) {
 
     // Render Remaining Articles in Substack-Style Grid
     const gridBlogs = blogs.slice(1);
-    gridBlogs.forEach(blog => {
-        const card = document.createElement('article');
-        card.className = 'article-card';
-        card.onclick = () => openReader(blog);
+    const gridLabel = document.getElementById('grid-label');
 
-        const blogTags = blog.tags && blog.tags.length > 0 ? blog.tags : [blog.category || 'MATH'];
-        const tagsHtml = blogTags.map(t => `<span class="card-tag-pill" onclick="event.stopPropagation(); filterByTag('${escapeHtml(t)}')">#${escapeHtml(t)}</span>`).join(' ');
+    if (gridBlogs.length === 0) {
+        if (gridLabel) gridLabel.style.display = 'none';
+        gridSection.style.display = 'none';
+    } else {
+        if (gridLabel) gridLabel.style.display = 'block';
+        gridSection.style.display = 'grid';
 
-        card.innerHTML = `
-            <div>
-                <div class="card-tags-bar">${tagsHtml}</div>
-                <h3 class="article-card-title">${escapeHtml(blog.title)}</h3>
-                <p class="article-card-subtitle">${escapeHtml(blog.subtitle || (blog.content.substring(0, 110) + '...'))}</p>
-            </div>
-            <div class="meta-strip">
-                <span class="meta-author">${escapeHtml(blog.author)}</span>
-                <span class="dot">•</span>
-                <span>📖 ${escapeHtml(blog.read_time || '2 min read')}</span>
-            </div>
-        `;
-        gridSection.appendChild(card);
-        renderMath(card);
-    });
+        gridBlogs.forEach(blog => {
+            const card = document.createElement('article');
+            card.className = 'article-card';
+            card.onclick = () => openReader(blog);
+
+            const blogTags = blog.tags && blog.tags.length > 0 ? blog.tags : [blog.category || 'MATH'];
+            const tagsHtml = blogTags.map(t => `<span class="card-tag-pill" onclick="event.stopPropagation(); filterByTag('${escapeHtml(t)}')">#${escapeHtml(t)}</span>`).join(' ');
+
+            card.innerHTML = `
+                <div>
+                    <div class="card-tags-bar" style="margin-bottom: 0.5rem;">${tagsHtml}</div>
+                    <h3 class="article-card-title">${escapeHtml(blog.title)}</h3>
+                    <p class="article-card-subtitle">${escapeHtml(blog.subtitle || (blog.content.substring(0, 110) + '...'))}</p>
+                </div>
+                <div class="meta-strip">
+                    <span class="meta-author">${escapeHtml(blog.author)}</span>
+                    <span class="dot">•</span>
+                    <span>📖 ${escapeHtml(blog.read_time || '2 min read')}</span>
+                </div>
+            `;
+            gridSection.appendChild(card);
+            renderMath(card);
+        });
+    }
 }
 
 /**

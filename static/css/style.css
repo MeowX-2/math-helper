@@ -862,25 +862,6 @@ body {
     background: var(--bg-surface);
 }
 
-.btn-delete-article {
-    background: rgba(239, 68, 68, 0.1);
-    border: 1px solid rgba(239, 68, 68, 0.3);
-    color: #ef4444;
-    font-family: var(--font-sans);
-    font-size: 0.8rem;
-    font-weight: 600;
-    padding: 0.3rem 0.75rem;
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.btn-delete-article:hover {
-    background: #ef4444;
-    color: white;
-    border-color: #ef4444;
-}
-
 /* AI Tutor Bottom Control Panel */
 .tutor-footer {
     background: var(--bg-surface);
@@ -1271,6 +1252,31 @@ body {
     box-shadow: var(--shadow-sm);
     overflow-x: auto;
 }
+
+/* Delete Article Button (Subtle & In-Reader Only) */
+.btn-delete-article {
+    background: transparent;
+    color: var(--text-muted);
+    border: 1px solid var(--border-color);
+    font-family: var(--font-sans);
+    font-size: 0.8rem;
+    font-weight: 500;
+    padding: 0.35rem 0.75rem;
+    border-radius: var(--radius-sm, 6px);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    transition: all 0.2s ease;
+}
+
+.btn-delete-article:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--accent-crimson, #ef4444);
+    border-color: rgba(239, 68, 68, 0.4);
+    transform: translateY(-1px);
+}
+
 
 /* Responsive Media Queries */
 @media (max-width: 900px) {
